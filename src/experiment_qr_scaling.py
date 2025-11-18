@@ -2,33 +2,28 @@ import cv2
 import time
 import numpy as np
 import csv
+import os
 
-# -------------------------------------------
-# Настройки эксперимента
-# -------------------------------------------
-IMAGE_PATH = "./pics/qr-code.png"
-CSV_PATH = "qr_experiment_results.csv"
+# Получаем абсолютный путь к корню проекта
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-NUM_ITERS = 20      # число повторов для усреднения
-MIN_SCALE = 0.05     # минимальный масштаб
-MAX_SCALE = 1.0      # максимальный масштаб
-NUM_SCALES = 20      # количество измерений по шкале
+IMAGE_PATH = os.path.join(ROOT, "data", "qr.png")
+CSV_PATH = os.path.join(ROOT, "outputs", "qr_experiment_results.csv")
 
-# -------------------------------------------
-# Загрузка QR и проверка
-# -------------------------------------------
+NUM_ITERS = 20
+MIN_SCALE = 0.05
+MAX_SCALE = 1.0
+NUM_SCALES = 20
+
 img = cv2.imread(IMAGE_PATH)
 if img is None:
-    raise FileNotFoundError(f"Файл {IMAGE_PATH} не найден")
+    raise FileNotFoundError(f"Cannot read image: {IMAGE_PATH}")
 
 detector = cv2.QRCodeDetector()
 
 scales = np.linspace(MAX_SCALE, MIN_SCALE, NUM_SCALES)
 results = []
 
-# -------------------------------------------
-# Основной цикл эксперимента
-# -------------------------------------------
 for s in scales:
     scaled = cv2.resize(img, None, fx=s, fy=s, interpolation=cv2.INTER_AREA)
 
@@ -41,7 +36,6 @@ for s in scales:
         t1 = time.perf_counter()
 
         times.append(t1 - t0)
-
         if data:
             decoded_ok += 1
 
@@ -51,12 +45,13 @@ for s in scales:
     results.append((s, avg_time_ms, success_rate))
     print(f"scale={s:.2f}, time={avg_time_ms:.2f} ms, success={success_rate:.2f}")
 
-# -------------------------------------------
+# Создать outputs/ если вдруг отсутствует
+os.makedirs(os.path.join(ROOT, "outputs"), exist_ok=True)
+
 # Сохранение CSV
-# -------------------------------------------
 with open(CSV_PATH, "w", newline="") as f:
     writer = csv.writer(f)
     writer.writerow(["scale", "avg_time_ms", "success_rate"])
     writer.writerows(results)
 
-print(f"\nCSV сохранён: {CSV_PATH}")
+print(f"\nCSV saved to: {CSV_PATH}")
