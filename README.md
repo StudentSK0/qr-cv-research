@@ -41,9 +41,3 @@ If you do not use a `requirements.txt`, install packages manually:
 ```bash
 pip install opencv-python matplotlib numpy
 ```
-
-(Optionally) install development tools:
-
-```bash
-pip install black flake8
-```
