@@ -14,24 +14,6 @@ A *module* is a single cell within a matrix barcode symbol, representing one bit
 
 The results of this study are valuable for engineers, system integrators, and users of scanning systems, providing insights into optimal QR code sizing and robustness under real-world conditions.
 
-## Project Structure
-project_root/
-│
-├── src/           # Source code: experiment and plotting scripts
-│    ├── experiment_qr_scaling.py
-│    └── plot_qr_results.py
-│
-├── data/          # Input QR images used in experiments
-│
-├── outputs/       # Generated results: CSV files and plots
-│
-├── docs/          # Documentation and reports (PDF, notes, etc.)
-│
-├── pics/          # Additional project images or illustrations
-│
-├── README.md      # Project description and usage instructions
-└── .gitignore     # Git ignore rules
-
 ## Installation
 
 Clone the repository:
@@ -58,4 +40,25 @@ If you do not use a `requirements.txt`, install packages manually:
 
 ```bash
 pip install opencv-python matplotlib numpy
+```
+
+## Project Structure
+
+```
+project_root/
+│
+├── src/           # Source code: experiment and plotting scripts
+│    ├── experiment_qr_scaling.py
+│    └── plot_qr_results.py
+│
+├── data/          # Input QR images used in experiments
+│
+├── outputs/       # Generated results: CSV files and plots
+│
+├── docs/          # Documentation and reports (PDF, notes, etc.)
+│
+├── pics/          # Additional project images or illustrations
+│
+├── README.md      # Project description and usage instructions
+└── .gitignore     # Git ignore rules
 ```
