@@ -55,10 +55,6 @@ project_root/
 │
 ├── outputs/       # Generated results: CSV files and plots
 │
-├── docs/          # Documentation and reports (PDF, notes, etc.)
-│
-├── pics/          # Additional project images or illustrations
-│
 ├── README.md      # Project description and usage instructions
 └── .gitignore     # Git ignore rules
 ```
