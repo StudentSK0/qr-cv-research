@@ -36,10 +36,56 @@ Install required dependencies:
 pip install -r requirements.txt
 ```
 
-If you do not use a `requirements.txt`, install packages manually:
 
-```bash
-pip install opencv-python matplotlib numpy
+## Project Structure
+
+```
+qr_open_cv_proj/
+├── .venv/                             # Python virtual environment
+│
+├── datasets/                          # Datasets with QR images and annotations
+│
+├── outputs/                           # Generated processing results and graphics
+│   ├── open_cv_json_and_graphics/
+│   └── zxing_json_and_graphics/
+│
+├── src/                               # Python source files
+│   ├── open_cv_programs/
+│   │   ├── qr_plot_results_open_cv.py
+│   │   └── qr_process_data_open_cv.py
+│   │
+│   └── zxing_programs/
+│       ├── qr_plot_results_zxing.py
+│       └── qr_process_data_zxing.py
+│
+├── .gitignore                         # Git ignore rules
+└── README.md                          # Project documentation
+
+```
+
+## datasets Directory Structure
+```
+datasets/
+├── Dubska/                       
+│   ├── images/
+│   │   └── QR_CODE/               # QR code images (.jpg/.png)
+│   │       ├── 001.jpg
+│   │       ├── 002.jpg
+│   │       └── ...
+│   │
+│   └── markup/
+│       └── QR_CODE/               # Image annotations (.json)
+│           ├── 001.jpg.json
+│           ├── 002.jpg.json
+│           └── ...
+│
+└── SE-Barcode/                    
+    ├── images/
+    │   └── QR_CODE/               # QR code images
+    │
+    └── markup/
+        └── QR_CODE/               # Image annotations
+
 ```
 
 ## Project Structure
