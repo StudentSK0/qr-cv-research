@@ -1,0 +1,2360 @@
+[
+  {
+    "dataset": "Dubska",
+    "module_size": 20.204897220918316,
+    "time": 0.40672936600094545,
+    "accuracy": 1.0,
+    "decoded": "",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/20110817_175_0.jpg"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 7.122808594130814,
+    "time": 0.19038865699985763,
+    "accuracy": 0.0,
+    "decoded": "Courage is what it takes to stand up and speak. Courage is also what it takes to sit down and listen. (W. Churchill)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/20110817_401_0.jpg"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 28.39331181103313,
+    "time": 0.3804994860001898,
+    "accuracy": 1.0,
+    "decoded": "",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/20110817_299_0.jpg"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 19.473278392776685,
+    "time": 0.3978887150005903,
+    "accuracy": 0.0,
+    "decoded": "Education is like a double-edged sword. It may be turned to dangerous uses if it is not properly handled. (Wu Ting-Fang)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/20110817_207_0.jpg"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 8.409601494959722,
+    "time": 0.1888012349991186,
+    "accuracy": 0.0,
+    "decoded": "Love is friendship, set on fire. (Jeremy Taylor)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_20120226_164453_0.jpg"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 16.648977111673904,
+    "time": 0.38315667000279063,
+    "accuracy": 0.0,
+    "decoded": "Love is composed of a single soul inhabiting two bodies. (Aristotle)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/20110817_048_0.jpg"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 5.921511918355995,
+    "time": 0.23519981799836387,
+    "accuracy": 1.0,
+    "decoded": "",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_20120226_164408_0.jpg"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 2.7998097898796863,
+    "time": 0.20050803500271286,
+    "accuracy": 1.0,
+    "decoded": "",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/img2_2.jpg"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 28.307722181108296,
+    "time": 0.39947020200270345,
+    "accuracy": 0.0,
+    "decoded": "Love is like a virus. It can happen to anybody at any time. (Maya Angelou)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/20110817_040_0.jpg"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 8.58244267898749,
+    "time": 0.18530462999842712,
+    "accuracy": 0.0,
+    "decoded": "True friends stab you in the front. (Oscar Wilde)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_20120226_162222_0.jpg"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 19.404563914930197,
+    "time": 0.2787488760004635,
+    "accuracy": 1.0,
+    "decoded": "",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_20120226_161648_1.jpg"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 11.644816489655623,
+    "time": 0.19590486499873805,
+    "accuracy": 0.0,
+    "decoded": "True friends stab you in the front. (Oscar Wilde)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_20120226_162222_3.jpg"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 16.344651421168436,
+    "time": 0.2852932850000798,
+    "accuracy": 1.0,
+    "decoded": "",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_20120226_164440_1.jpg"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 6.190523215583889,
+    "time": 0.18961809900065418,
+    "accuracy": 0.0,
+    "decoded": "Women marry men hoping they will change. Men marry women hoping they will not. So each is inevitably disappointed. (Albert Einstein)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/20110817_376_0.jpg"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 14.124811374949616,
+    "time": 0.29634944400095264,
+    "accuracy": 1.0,
+    "decoded": "",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_20120226_153733_0.jpg"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 3.579791813702937,
+    "time": 0.17573853700014297,
+    "accuracy": 0.0,
+    "decoded": "True friends stab you in the front. (Oscar Wilde)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_20120226_145048_0.jpg"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 20.226157854843123,
+    "time": 0.35879916599878925,
+    "accuracy": 1.0,
+    "decoded": "",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/20110817_206_0.jpg"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 17.469631032399306,
+    "time": 0.2863428609998664,
+    "accuracy": 1.0,
+    "decoded": "",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_20120226_161556_0.jpg"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 13.97969479891325,
+    "time": 0.3105697630016948,
+    "accuracy": 1.0,
+    "decoded": "",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/20110817_201_0.jpg"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 2.4923502109402764,
+    "time": 0.17571122799927252,
+    "accuracy": 0.0,
+    "decoded": "Love is friendship, set on fire. (Jeremy Taylor)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_20120226_165417_1.jpg"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 12.61265959464838,
+    "time": 0.19698768399757682,
+    "accuracy": 0.0,
+    "decoded": "Your friend is the man who knows all about you and still likes you. (Elbert Hubbard)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_20120226_161648_0.jpg"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 13.173980041884583,
+    "time": 0.25809100499827764,
+    "accuracy": 0.0,
+    "decoded": "Love is friendship, set on fire. (Jeremy Taylor)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_20120226_153733_1.jpg"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 8.710147015806648,
+    "time": 0.19836970399774145,
+    "accuracy": 0.0,
+    "decoded": "I think the next best thing to solving a problem is finding some humor in it. (F.H. Clark)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/20110817_096_0.jpg"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 17.81205894290708,
+    "time": 0.3385604120012431,
+    "accuracy": 1.0,
+    "decoded": "",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_20120226_161556_1.jpg"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 3.5031578680144864,
+    "time": 0.17379254800107446,
+    "accuracy": 0.0,
+    "decoded": "Love is friendship, set on fire. (Jeremy Taylor)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_20120226_165359_1.jpg"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 5.348788859163884,
+    "time": 0.2254164480000327,
+    "accuracy": 1.0,
+    "decoded": "",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_20120226_165417_0.jpg"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 5.282823780501358,
+    "time": 0.177242847999878,
+    "accuracy": 0.0,
+    "decoded": "True friends stab you in the front. (Oscar Wilde)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_20120226_162222_2.jpg"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 17.318887144483814,
+    "time": 0.27357936299813446,
+    "accuracy": 1.0,
+    "decoded": "",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_20120226_164453_1.jpg"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 19.590443779543833,
+    "time": 0.3997278480019304,
+    "accuracy": 0.0,
+    "decoded": "Intellectual growth should commence at birth and cease only at death. (Albert Einstein)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/20110817_043_0.jpg"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 9.424291170499712,
+    "time": 0.1959891639999114,
+    "accuracy": 0.0,
+    "decoded": "Your friend is the man who knows all about you and still likes you. (Elbert Hubbard)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/111IMG_20120226_161648_0.jpg"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 14.446329534559046,
+    "time": 0.3490490410003986,
+    "accuracy": 1.0,
+    "decoded": "",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/20110817_143_0.jpg"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 22.66471346470846,
+    "time": 0.3587018079997506,
+    "accuracy": 1.0,
+    "decoded": "",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/20110817_066_0.jpg"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 10.56806929438437,
+    "time": 0.31017676600095,
+    "accuracy": 1.0,
+    "decoded": "",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/20110817_106_0.jpg"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 3.487670408734331,
+    "time": 0.17604961100005312,
+    "accuracy": 0.0,
+    "decoded": "Love is friendship, set on fire. (Jeremy Taylor)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_20120226_165408_1.jpg"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 25.226117971956228,
+    "time": 0.3289325799996732,
+    "accuracy": 1.0,
+    "decoded": "",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/20110817_013_0.jpg"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 14.484698709733689,
+    "time": 0.2602210270015348,
+    "accuracy": 1.0,
+    "decoded": "",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/111IMG_20120226_161648_1.jpg"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 25.422977718463674,
+    "time": 0.30472704999920097,
+    "accuracy": 1.0,
+    "decoded": "",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_20120226_151933_0.jpg"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 9.863417825633345,
+    "time": 0.26841341099861893,
+    "accuracy": 1.0,
+    "decoded": "",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/20110817_211_0.jpg"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 13.965398514350055,
+    "time": 0.258392580999498,
+    "accuracy": 1.0,
+    "decoded": "",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_20120226_151917_1.jpg"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 4.90135393816505,
+    "time": 0.1776037890012958,
+    "accuracy": 0.0,
+    "decoded": "Love is friendship, set on fire. (Jeremy Taylor)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/img1_0.jpg"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 12.886399132301035,
+    "time": 0.2571233550006582,
+    "accuracy": 0.0,
+    "decoded": "True friends stab you in the front. (Oscar Wilde)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_20120226_165408_0.jpg"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 2.881622343355839,
+    "time": 0.1763333760027308,
+    "accuracy": 0.0,
+    "decoded": "True friends stab you in the front. (Oscar Wilde)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_20120226_153733_2.jpg"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 30.06836070825755,
+    "time": 0.36531626999931177,
+    "accuracy": 1.0,
+    "decoded": "",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/20110817_317_0.jpg"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 4.94925072831124,
+    "time": 0.18657148300189874,
+    "accuracy": 0.0,
+    "decoded": "Never be afraid to laugh at yourself. After all, you could be missing out on the joke of the century. (Dame Edna Everage)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/20110817_394_0.jpg"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 5.163274533350183,
+    "time": 0.20944367300035083,
+    "accuracy": 1.0,
+    "decoded": "",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_20120226_164408_2.jpg"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 5.085845781481099,
+    "time": 0.17841946599946823,
+    "accuracy": 0.0,
+    "decoded": "True friends stab you in the front. (Oscar Wilde)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/img1_1.jpg"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 11.247635988989137,
+    "time": 0.18837499499932164,
+    "accuracy": 0.0,
+    "decoded": "Love is friendship, set on fire. (Jeremy Taylor)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_20120226_162222_1.jpg"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 19.658924611077403,
+    "time": 0.4198728070005018,
+    "accuracy": 0.0,
+    "decoded": "Never be afraid to laugh at yourself. After all, you could be missing out on the joke of the century. (Dame Edna Everage)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/20110817_355_0.jpg"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 9.463954540374631,
+    "time": 0.20203372000105446,
+    "accuracy": 0.0,
+    "decoded": "Love does not make the world go round, love is what makes the ride worthwhile. (Elizabeth Browning    )",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/20110817_326_0.jpg"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 8.553673514278131,
+    "time": 0.18342513300012797,
+    "accuracy": 0.0,
+    "decoded": "Love is friendship, set on fire. (Jeremy Taylor)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_20120226_164440_0.jpg"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 8.771996557901423,
+    "time": 0.18876680500034126,
+    "accuracy": 0.0,
+    "decoded": "Love is friendship, set on fire. (Jeremy Taylor)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_20120226_151917_0.jpg"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 5.233732819718714,
+    "time": 0.17769996100105345,
+    "accuracy": 0.0,
+    "decoded": "True friends stab you in the front. (Oscar Wilde)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_20120226_155947_0.jpg"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 2.3347879660054565,
+    "time": 0.18987455800015596,
+    "accuracy": 1.0,
+    "decoded": "",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/img2_0.jpg"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 27.462638868853947,
+    "time": 0.3447664440027438,
+    "accuracy": 1.0,
+    "decoded": "",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/20110817_030_0.jpg"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 21.441784540965983,
+    "time": 0.3857663640010287,
+    "accuracy": 1.0,
+    "decoded": "",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/20110817_177_0.jpg"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 8.415429684924414,
+    "time": 0.2510918610023509,
+    "accuracy": 1.0,
+    "decoded": "",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/img2_3.jpg"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 6.579127874993507,
+    "time": 0.19909396000002744,
+    "accuracy": 0.0,
+    "decoded": "Love at first sight is easy to understand, it is when two people have been looking at each other for a lifetime that it becomes a miracle. (Amy Bloom)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/20110817_402_0.jpg"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 4.490781316239947,
+    "time": 0.2161234359991795,
+    "accuracy": 1.0,
+    "decoded": "",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_20120226_145048_1.jpg"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 2.3795855309728857,
+    "time": 0.19559379299971624,
+    "accuracy": 1.0,
+    "decoded": "",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/img2_1.jpg"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 9.136753249116904,
+    "time": 0.19323343600262888,
+    "accuracy": 0.0,
+    "decoded": "You are not angry with people when you laugh at them. Humor teaches tolerance. (W. Somerset Maugham)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/20110817_089_0.jpg"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 3.798164939936272,
+    "time": 0.17032800200104248,
+    "accuracy": 0.0,
+    "decoded": "Love is friendship, set on fire. (Jeremy Taylor)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_20120226_164408_1.jpg"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 11.006015775170658,
+    "time": 0.24581192799814744,
+    "accuracy": 0.0,
+    "decoded": "True friends stab you in the front. (Oscar Wilde)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_20120226_165359_0.jpg"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 6.029482807631788,
+    "time": 0.2268317149973882,
+    "accuracy": 1.0,
+    "decoded": "",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_20120226_165417_2.jpg"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 20.01420368076017,
+    "time": 0.30434830299782334,
+    "accuracy": 0.0,
+    "decoded": "True friends stab you in the front. (Oscar Wilde)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2760_2.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 12.224567097078912,
+    "time": 0.19433406499956618,
+    "accuracy": 0.0,
+    "decoded": "True friends stab you in the front. (Oscar Wilde)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2763_2.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 12.073429739447343,
+    "time": 0.18607044300006237,
+    "accuracy": 0.0,
+    "decoded": "True friends stab you in the front. (Oscar Wilde)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2766_6.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 16.128094823853196,
+    "time": 0.20013403800112428,
+    "accuracy": 0.0,
+    "decoded": "True friends stab you in the front. (Oscar Wilde)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2768_2.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 35.64075144601223,
+    "time": 0.3741153689989005,
+    "accuracy": 0.0,
+    "decoded": "True friends stab you in the front. (Oscar Wilde)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2765_0.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 10.125446339947574,
+    "time": 0.18698229100118624,
+    "accuracy": 0.0,
+    "decoded": "True friends stab you in the front. (Oscar Wilde)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2763_13.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 15.753161407806402,
+    "time": 0.27324810800200794,
+    "accuracy": 1.0,
+    "decoded": "",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2759_0.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 16.53357114348307,
+    "time": 0.19851930599907064,
+    "accuracy": 0.0,
+    "decoded": "True friends stab you in the front. (Oscar Wilde)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2766_4.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 21.52514299605182,
+    "time": 0.28290562400070485,
+    "accuracy": 1.0,
+    "decoded": "",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2724_0.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 33.72765408495765,
+    "time": 0.40084154199939803,
+    "accuracy": 0.0,
+    "decoded": "True friends stab you in the front. (Oscar Wilde)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2770_1.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 60.43525088294217,
+    "time": 0.46628326599966385,
+    "accuracy": 1.0,
+    "decoded": "",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2715_0.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 36.04834238736933,
+    "time": 0.3863243979976687,
+    "accuracy": 1.0,
+    "decoded": "",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2762_0.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 13.740380799533046,
+    "time": 0.19083746099931886,
+    "accuracy": 0.0,
+    "decoded": "True friends stab you in the front. (Oscar Wilde)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2766_7.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 76.88163459281903,
+    "time": 0.5884626010010834,
+    "accuracy": 1.0,
+    "decoded": "",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2743_0.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 10.946287719304523,
+    "time": 0.19232040199858602,
+    "accuracy": 0.0,
+    "decoded": "True friends stab you in the front. (Oscar Wilde)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2732_0.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 12.38061552935133,
+    "time": 0.18389411799944355,
+    "accuracy": 0.0,
+    "decoded": "True friends stab you in the front. (Oscar Wilde)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2748_2.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 12.431323672134354,
+    "time": 0.2619746749987826,
+    "accuracy": 0.0,
+    "decoded": "True friends stab you in the front. (Oscar Wilde)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2749_2.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 8.173619542487438,
+    "time": 0.18714732599983108,
+    "accuracy": 0.0,
+    "decoded": "True friends stab you in the front. (Oscar Wilde)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2746_2.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 16.686788993413103,
+    "time": 0.2918638209994242,
+    "accuracy": 0.0,
+    "decoded": "True friends stab you in the front. (Oscar Wilde)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2767_2.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 29.424691521200316,
+    "time": 0.3523936759993376,
+    "accuracy": 1.0,
+    "decoded": "",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2762_1.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 16.989371235276614,
+    "time": 0.29320428500068374,
+    "accuracy": 1.0,
+    "decoded": "",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2722_0.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 15.119024954477064,
+    "time": 0.19665880400134483,
+    "accuracy": 0.0,
+    "decoded": "Love is friendship, set on fire. (Jeremy Taylor)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_3029_1.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 50.30888079909815,
+    "time": 0.3969281950012373,
+    "accuracy": 1.0,
+    "decoded": "",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2736_0.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 7.125930241558355,
+    "time": 0.2317055919993436,
+    "accuracy": 1.0,
+    "decoded": "",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_3010_0.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 7.322316397292389,
+    "time": 0.18883804500001133,
+    "accuracy": 0.0,
+    "decoded": "True friends stab you in the front. (Oscar Wilde)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_3011_1.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 12.425797981311524,
+    "time": 0.1950298269985069,
+    "accuracy": 0.0,
+    "decoded": "True friends stab you in the front. (Oscar Wilde)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2744_0.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 8.107481682889183,
+    "time": 0.1877433520021441,
+    "accuracy": 0.0,
+    "decoded": "Love is friendship, set on fire. (Jeremy Taylor)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_3083_2.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 17.197695287370312,
+    "time": 0.30374871700041695,
+    "accuracy": 0.0,
+    "decoded": "True friends stab you in the front. (Oscar Wilde)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2772_1.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 22.09563460091416,
+    "time": 0.2919101259976742,
+    "accuracy": 0.0,
+    "decoded": "True friends stab you in the front. (Oscar Wilde)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2764_7.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 10.899841366443518,
+    "time": 0.2538084110019554,
+    "accuracy": 0.0,
+    "decoded": "True friends stab you in the front. (Oscar Wilde)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2763_9.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 39.21680409335126,
+    "time": 0.4150036850005563,
+    "accuracy": 1.0,
+    "decoded": "",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2727_0.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 21.719509130077213,
+    "time": 0.3171581079986936,
+    "accuracy": 0.0,
+    "decoded": "True friends stab you in the front. (Oscar Wilde)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2752_1.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 17.622797127058032,
+    "time": 0.2054590890002146,
+    "accuracy": 0.0,
+    "decoded": "Love is friendship, set on fire. (Jeremy Taylor)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_3044_1.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 10.481795606975586,
+    "time": 0.24524321200078703,
+    "accuracy": 0.0,
+    "decoded": "True friends stab you in the front. (Oscar Wilde)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2748_1.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 9.216636720243098,
+    "time": 0.1872292509979161,
+    "accuracy": 0.0,
+    "decoded": "True friends stab you in the front. (Oscar Wilde)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2763_8.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 58.972185300106396,
+    "time": 0.6254660660015361,
+    "accuracy": 0.0,
+    "decoded": "Love is friendship, set on fire. (Jeremy Taylor)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2726_0.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 23.889423176067474,
+    "time": 0.30804081500173197,
+    "accuracy": 0.0,
+    "decoded": "Love is friendship, set on fire. (Jeremy Taylor)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2754_3.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 13.260315552047281,
+    "time": 0.1959523609984899,
+    "accuracy": 0.0,
+    "decoded": "True friends stab you in the front. (Oscar Wilde)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2763_4.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 10.217207807215074,
+    "time": 0.19507494400022551,
+    "accuracy": 0.0,
+    "decoded": "True friends stab you in the front. (Oscar Wilde)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2745_0.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 12.807668721540303,
+    "time": 0.29318885099928593,
+    "accuracy": 1.0,
+    "decoded": "",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2750_6.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 10.296077688759677,
+    "time": 0.24959111399948597,
+    "accuracy": 0.0,
+    "decoded": "True friends stab you in the front. (Oscar Wilde)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2748_0.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 10.506299829144309,
+    "time": 0.19598679200134939,
+    "accuracy": 0.0,
+    "decoded": "True friends stab you in the front. (Oscar Wilde)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2750_2.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 12.314909745527599,
+    "time": 0.20028601299782167,
+    "accuracy": 0.0,
+    "decoded": "True friends stab you in the front. (Oscar Wilde)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2755_1.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 16.057837475845275,
+    "time": 0.3061933740027598,
+    "accuracy": 0.0,
+    "decoded": "True friends stab you in the front. (Oscar Wilde)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2742_0.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 12.116574267029716,
+    "time": 0.19204138699933537,
+    "accuracy": 0.0,
+    "decoded": "True friends stab you in the front. (Oscar Wilde)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2766_8.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 15.273759488176538,
+    "time": 0.19692238700008602,
+    "accuracy": 0.0,
+    "decoded": "True friends stab you in the front. (Oscar Wilde)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2766_2.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 23.87599487409904,
+    "time": 0.3299097349990916,
+    "accuracy": 0.0,
+    "decoded": "Love is friendship, set on fire. (Jeremy Taylor)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_3011_0.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 15.59272821044528,
+    "time": 0.28503445999740507,
+    "accuracy": 0.0,
+    "decoded": "True friends stab you in the front. (Oscar Wilde)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2767_1.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 32.84780693744355,
+    "time": 0.38487945499946363,
+    "accuracy": 0.0,
+    "decoded": "True friends stab you in the front. (Oscar Wilde)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2757_2.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 15.913089391267668,
+    "time": 0.27062536000084947,
+    "accuracy": 0.0,
+    "decoded": "True friends stab you in the front. (Oscar Wilde)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2760_1.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 10.116903061977645,
+    "time": 0.2438754409995454,
+    "accuracy": 0.0,
+    "decoded": "True friends stab you in the front. (Oscar Wilde)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2747_4.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 30.034958960053693,
+    "time": 0.3974624840011529,
+    "accuracy": 0.0,
+    "decoded": "True friends stab you in the front. (Oscar Wilde)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2738_0.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 5.357456928243778,
+    "time": 0.21108452800035593,
+    "accuracy": 1.0,
+    "decoded": "",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_3003_0.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 15.686956121188235,
+    "time": 0.19720021600005566,
+    "accuracy": 0.0,
+    "decoded": "True friends stab you in the front. (Oscar Wilde)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2766_3.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 23.031895835295632,
+    "time": 0.32448257799842395,
+    "accuracy": 0.0,
+    "decoded": "True friends stab you in the front. (Oscar Wilde)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/111IMG_2756_0.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 24.4006728686216,
+    "time": 0.3003316629983601,
+    "accuracy": 0.0,
+    "decoded": "True friends stab you in the front. (Oscar Wilde)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2764_1.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 5.383096396145856,
+    "time": 0.19599747900065267,
+    "accuracy": 1.0,
+    "decoded": "",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_3026_2.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 5.027850808648899,
+    "time": 0.2171326460011187,
+    "accuracy": 1.0,
+    "decoded": "",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_3018_1.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 19.034329209034894,
+    "time": 0.28189285999906133,
+    "accuracy": 0.0,
+    "decoded": "True friends stab you in the front. (Oscar Wilde)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2719_0.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 23.00593224499569,
+    "time": 0.2852968549996149,
+    "accuracy": 1.0,
+    "decoded": "",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2768_3.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 36.27929973011309,
+    "time": 0.436964029999217,
+    "accuracy": 0.0,
+    "decoded": "Love is friendship, set on fire. (Jeremy Taylor)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2748_6.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 18.318713553936096,
+    "time": 0.29843198000162374,
+    "accuracy": 1.0,
+    "decoded": "",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2769_1.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 9.758316679008734,
+    "time": 0.1841553260019282,
+    "accuracy": 0.0,
+    "decoded": "True friends stab you in the front. (Oscar Wilde)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2763_5.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 14.962908525917785,
+    "time": 0.19463445600194973,
+    "accuracy": 0.0,
+    "decoded": "True friends stab you in the front. (Oscar Wilde)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2766_1.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 15.448616133937332,
+    "time": 0.19109867000224767,
+    "accuracy": 0.0,
+    "decoded": "True friends stab you in the front. (Oscar Wilde)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2766_0.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 11.339688967930439,
+    "time": 0.18897221200313652,
+    "accuracy": 0.0,
+    "decoded": "True friends stab you in the front. (Oscar Wilde)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2763_12.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 64.21630971888378,
+    "time": 0.5454620840027928,
+    "accuracy": 0.0,
+    "decoded": "Love is friendship, set on fire. (Jeremy Taylor)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2741_0.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 7.035742576995931,
+    "time": 0.18392855199999758,
+    "accuracy": 0.0,
+    "decoded": "Love is friendship, set on fire. (Jeremy Taylor)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_3022_2.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 4.603795673852174,
+    "time": 0.17657558899736614,
+    "accuracy": 0.0,
+    "decoded": "Love is friendship, set on fire. (Jeremy Taylor)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_3022_0.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 13.65362540029695,
+    "time": 0.19731776000116952,
+    "accuracy": 0.0,
+    "decoded": "True friends stab you in the front. (Oscar Wilde)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2710_0.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 10.68747252351919,
+    "time": 0.19434594199992716,
+    "accuracy": 0.0,
+    "decoded": "True friends stab you in the front. (Oscar Wilde)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2750_1.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 16.214382477168378,
+    "time": 0.2706562319981458,
+    "accuracy": 0.0,
+    "decoded": "True friends stab you in the front. (Oscar Wilde)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2760_0.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 19.6462696255979,
+    "time": 0.3024889919979614,
+    "accuracy": 1.0,
+    "decoded": "",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2758_1.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 5.342350686911157,
+    "time": 0.17764534800153342,
+    "accuracy": 0.0,
+    "decoded": "True friends stab you in the front. (Oscar Wilde)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_3019_1.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 11.16252908762187,
+    "time": 0.19193571800133213,
+    "accuracy": 0.0,
+    "decoded": "True friends stab you in the front. (Oscar Wilde)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2763_6.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 28.675213288162908,
+    "time": 0.3786449330000323,
+    "accuracy": 0.0,
+    "decoded": "True friends stab you in the front. (Oscar Wilde)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/111IMG_2756_2.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 12.705084852694416,
+    "time": 0.19362287500189268,
+    "accuracy": 0.0,
+    "decoded": "True friends stab you in the front. (Oscar Wilde)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_3070_0.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 38.51790031329535,
+    "time": 0.3694314669992309,
+    "accuracy": 0.0,
+    "decoded": "True friends stab you in the front. (Oscar Wilde)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2765_4.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 16.267210667659693,
+    "time": 0.281730200000311,
+    "accuracy": 1.0,
+    "decoded": "",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2758_2.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 10.205086514494143,
+    "time": 0.24893097600215697,
+    "accuracy": 0.0,
+    "decoded": "True friends stab you in the front. (Oscar Wilde)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2748_5.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 10.114808682674177,
+    "time": 0.18702978599685594,
+    "accuracy": 0.0,
+    "decoded": "True friends stab you in the front. (Oscar Wilde)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2748_4.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 5.575487304164765,
+    "time": 0.1768629170001077,
+    "accuracy": 0.0,
+    "decoded": "Love is friendship, set on fire. (Jeremy Taylor)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_3026_0.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 15.954263029862469,
+    "time": 0.20511121200252092,
+    "accuracy": 0.0,
+    "decoded": "True friends stab you in the front. (Oscar Wilde)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2742_1.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 50.17162276544607,
+    "time": 0.5836872820000281,
+    "accuracy": 0.0,
+    "decoded": "Love is friendship, set on fire. (Jeremy Taylor)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2714_0.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 11.58589710653165,
+    "time": 0.24454033199799596,
+    "accuracy": 0.0,
+    "decoded": "True friends stab you in the front. (Oscar Wilde)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2754_6.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 36.05589234012704,
+    "time": 0.3962858699997014,
+    "accuracy": 0.0,
+    "decoded": "Love is friendship, set on fire. (Jeremy Taylor)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2717_0.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 11.355111589683624,
+    "time": 0.2686983710009372,
+    "accuracy": 1.0,
+    "decoded": "",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2751_2.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 11.85493208204366,
+    "time": 0.29449251299956813,
+    "accuracy": 1.0,
+    "decoded": "",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2771_1.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 21.204026171915725,
+    "time": 0.30039103099989006,
+    "accuracy": 0.0,
+    "decoded": "True friends stab you in the front. (Oscar Wilde)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2764_5.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 46.96272935228624,
+    "time": 0.4353944190006587,
+    "accuracy": 0.0,
+    "decoded": "Love is friendship, set on fire. (Jeremy Taylor)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2728_0.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 12.405885506745928,
+    "time": 0.19378316100119264,
+    "accuracy": 0.0,
+    "decoded": "True friends stab you in the front. (Oscar Wilde)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2766_13.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 9.956901039815875,
+    "time": 0.20667488999970374,
+    "accuracy": 0.0,
+    "decoded": "True friends stab you in the front. (Oscar Wilde)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2747_5.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 29.893814225665963,
+    "time": 0.38076664400068694,
+    "accuracy": 1.0,
+    "decoded": "",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2716_0.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 12.21818778628043,
+    "time": 0.20295981999879587,
+    "accuracy": 0.0,
+    "decoded": "True friends stab you in the front. (Oscar Wilde)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2751_1.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 8.377757203714566,
+    "time": 0.1935373910018825,
+    "accuracy": 0.0,
+    "decoded": "True friends stab you in the front. (Oscar Wilde)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2746_1.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 11.976747213794507,
+    "time": 0.1996009430004051,
+    "accuracy": 0.0,
+    "decoded": "True friends stab you in the front. (Oscar Wilde)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2763_1.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 19.652447096120113,
+    "time": 0.30844568999964395,
+    "accuracy": 1.0,
+    "decoded": "",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2761_2.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 9.993256983991657,
+    "time": 0.21096105099786655,
+    "accuracy": 0.0,
+    "decoded": "True friends stab you in the front. (Oscar Wilde)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2750_5.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 11.9838989845227,
+    "time": 0.18955636600003345,
+    "accuracy": 0.0,
+    "decoded": "True friends stab you in the front. (Oscar Wilde)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2766_11.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 14.711414163555784,
+    "time": 0.1983293430021149,
+    "accuracy": 0.0,
+    "decoded": "True friends stab you in the front. (Oscar Wilde)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2753_2.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 6.486000106904547,
+    "time": 0.18285048300094786,
+    "accuracy": 0.0,
+    "decoded": "Love is friendship, set on fire. (Jeremy Taylor)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_3024_0.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 24.80533966037823,
+    "time": 0.3166190789997927,
+    "accuracy": 0.0,
+    "decoded": "True friends stab you in the front. (Oscar Wilde)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2764_6.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 11.64848810314292,
+    "time": 0.2582489259984868,
+    "accuracy": 0.0,
+    "decoded": "True friends stab you in the front. (Oscar Wilde)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2750_0.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 20.32380937752694,
+    "time": 0.3262386009992042,
+    "accuracy": 0.0,
+    "decoded": "True friends stab you in the front. (Oscar Wilde)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2764_4.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 20.201088641601526,
+    "time": 0.30284874700009823,
+    "accuracy": 0.0,
+    "decoded": "True friends stab you in the front. (Oscar Wilde)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2733_0.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 6.934621090097157,
+    "time": 0.2541491699994367,
+    "accuracy": 1.0,
+    "decoded": "",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_3019_0.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 31.354576005808113,
+    "time": 0.34942424000109895,
+    "accuracy": 1.0,
+    "decoded": "",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2746_3.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 23.34074309354281,
+    "time": 0.3421235189998697,
+    "accuracy": 1.0,
+    "decoded": "",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2753_0.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 8.096367409583058,
+    "time": 0.19735456799753592,
+    "accuracy": 0.0,
+    "decoded": "True friends stab you in the front. (Oscar Wilde)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2754_2.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 15.198338604962158,
+    "time": 0.30006927299837116,
+    "accuracy": 1.0,
+    "decoded": "",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2734_0.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 23.674655174099602,
+    "time": 0.394725758000277,
+    "accuracy": 0.0,
+    "decoded": "True friends stab you in the front. (Oscar Wilde)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2764_3.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 7.822757613902555,
+    "time": 0.24108765900018625,
+    "accuracy": 1.0,
+    "decoded": "",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_3022_1.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 13.177726163602438,
+    "time": 0.19640472600076464,
+    "accuracy": 0.0,
+    "decoded": "True friends stab you in the front. (Oscar Wilde)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2711_0.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 14.439188906603768,
+    "time": 0.24300396499893395,
+    "accuracy": 1.0,
+    "decoded": "",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2712_0.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 19.22970730454516,
+    "time": 0.29785376799918595,
+    "accuracy": 1.0,
+    "decoded": "",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2759_1.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 14.70743554359897,
+    "time": 0.2548924229995464,
+    "accuracy": 0.0,
+    "decoded": "True friends stab you in the front. (Oscar Wilde)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2735_0.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 5.818529935337321,
+    "time": 0.1826712010006304,
+    "accuracy": 0.0,
+    "decoded": "True friends stab you in the front. (Oscar Wilde)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_3025_0.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 14.653842559757717,
+    "time": 0.2796880429996236,
+    "accuracy": 0.0,
+    "decoded": "True friends stab you in the front. (Oscar Wilde)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2753_3.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 19.485838129526726,
+    "time": 0.27363398899979074,
+    "accuracy": 0.0,
+    "decoded": "True friends stab you in the front. (Oscar Wilde)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2772_0.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 11.468078829621358,
+    "time": 0.25511207400268177,
+    "accuracy": 0.0,
+    "decoded": "True friends stab you in the front. (Oscar Wilde)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2766_5.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 12.671897773605444,
+    "time": 0.2820115930007887,
+    "accuracy": 0.0,
+    "decoded": "True friends stab you in the front. (Oscar Wilde)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2754_4.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 9.26049586729831,
+    "time": 0.20421717499993974,
+    "accuracy": 0.0,
+    "decoded": "True friends stab you in the front. (Oscar Wilde)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2763_10.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 72.88010058169294,
+    "time": 0.778999696001847,
+    "accuracy": 0.0,
+    "decoded": "Love is friendship, set on fire. (Jeremy Taylor)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2725_0.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 9.316581203196193,
+    "time": 0.2771958960001939,
+    "accuracy": 1.0,
+    "decoded": "",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2747_1.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 11.646283643771127,
+    "time": 0.2904770589993859,
+    "accuracy": 0.0,
+    "decoded": "True friends stab you in the front. (Oscar Wilde)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2749_1.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 32.47933819715997,
+    "time": 0.5285026659985306,
+    "accuracy": 0.0,
+    "decoded": "True friends stab you in the front. (Oscar Wilde)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2752_0.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 41.80209589176617,
+    "time": 0.5268879359973653,
+    "accuracy": 0.0,
+    "decoded": "Love is friendship, set on fire. (Jeremy Taylor)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2737_0.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 11.674934695794214,
+    "time": 0.33572633599760593,
+    "accuracy": 0.0,
+    "decoded": "True friends stab you in the front. (Oscar Wilde)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2746_0.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 28.586627330151696,
+    "time": 0.4034773650018906,
+    "accuracy": 0.0,
+    "decoded": "True friends stab you in the front. (Oscar Wilde)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2756_2.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 34.6334391993897,
+    "time": 0.49409464800191927,
+    "accuracy": 0.0,
+    "decoded": "Love is friendship, set on fire. (Jeremy Taylor)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2747_6.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 8.513737562768902,
+    "time": 0.21409790499819792,
+    "accuracy": 0.0,
+    "decoded": "True friends stab you in the front. (Oscar Wilde)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2754_0.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 23.52984803240273,
+    "time": 0.3805006910006341,
+    "accuracy": 0.0,
+    "decoded": "True friends stab you in the front. (Oscar Wilde)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/111IMG_2756_1.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 24.450710343936635,
+    "time": 0.3664549060013087,
+    "accuracy": 1.0,
+    "decoded": "",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2761_4.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 2.615491286103655,
+    "time": 0.21373934000075678,
+    "accuracy": 1.0,
+    "decoded": "",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_3018_0.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 19.81550630627918,
+    "time": 0.32305425999948056,
+    "accuracy": 1.0,
+    "decoded": "",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2761_3.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 18.772653629902074,
+    "time": 0.32144546500057913,
+    "accuracy": 0.0,
+    "decoded": "True friends stab you in the front. (Oscar Wilde)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2740_0.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 9.112046026552502,
+    "time": 0.20223200699911104,
+    "accuracy": 0.0,
+    "decoded": "True friends stab you in the front. (Oscar Wilde)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_3083_0.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 9.813532609615068,
+    "time": 0.20633294900108012,
+    "accuracy": 0.0,
+    "decoded": "True friends stab you in the front. (Oscar Wilde)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2763_7.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 12.767854750245363,
+    "time": 0.21152977099700365,
+    "accuracy": 0.0,
+    "decoded": "True friends stab you in the front. (Oscar Wilde)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2771_0.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 14.07110199319646,
+    "time": 0.20719492999705835,
+    "accuracy": 0.0,
+    "decoded": "True friends stab you in the front. (Oscar Wilde)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2766_12.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 21.02227030574346,
+    "time": 0.3306007529972703,
+    "accuracy": 1.0,
+    "decoded": "",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2769_0.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 18.01559869189711,
+    "time": 0.34156311499828007,
+    "accuracy": 1.0,
+    "decoded": "",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2741_1.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 12.295536517899432,
+    "time": 0.21868326800176874,
+    "accuracy": 0.0,
+    "decoded": "True friends stab you in the front. (Oscar Wilde)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2763_0.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 37.662175941705385,
+    "time": 0.5330203550001897,
+    "accuracy": 0.0,
+    "decoded": "Love is friendship, set on fire. (Jeremy Taylor)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2729_0.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 11.136214396499579,
+    "time": 0.20174996299829218,
+    "accuracy": 0.0,
+    "decoded": "True friends stab you in the front. (Oscar Wilde)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2723_0.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 16.26627435782941,
+    "time": 0.30615894899892737,
+    "accuracy": 1.0,
+    "decoded": "",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2758_0.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 8.111148830416747,
+    "time": 0.24146641100014676,
+    "accuracy": 1.0,
+    "decoded": "",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_3083_1.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 12.93790307551139,
+    "time": 0.22175719399820082,
+    "accuracy": 0.0,
+    "decoded": "True friends stab you in the front. (Oscar Wilde)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2720_0.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 36.66783014332738,
+    "time": 0.32902876600201125,
+    "accuracy": 1.0,
+    "decoded": "",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2752_2.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 20.577718930252214,
+    "time": 0.3345034170015424,
+    "accuracy": 1.0,
+    "decoded": "",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2743_1.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 28.093048782297362,
+    "time": 0.36905509999996866,
+    "accuracy": 0.0,
+    "decoded": "True friends stab you in the front. (Oscar Wilde)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2757_0.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 12.153468026020185,
+    "time": 0.2891045390024374,
+    "accuracy": 1.0,
+    "decoded": "",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2748_3.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 27.615779911306937,
+    "time": 0.4188766769984795,
+    "accuracy": 0.0,
+    "decoded": "True friends stab you in the front. (Oscar Wilde)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2757_1.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 36.31654305095907,
+    "time": 0.35884667500067735,
+    "accuracy": 1.0,
+    "decoded": "",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2765_3.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 39.331227332743524,
+    "time": 0.48522550300185685,
+    "accuracy": 0.0,
+    "decoded": "Love is friendship, set on fire. (Jeremy Taylor)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2750_3.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 11.924177366526049,
+    "time": 0.2741587789969344,
+    "accuracy": 0.0,
+    "decoded": "True friends stab you in the front. (Oscar Wilde)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2747_3.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 10.23507832990543,
+    "time": 0.20120617799693719,
+    "accuracy": 0.0,
+    "decoded": "True friends stab you in the front. (Oscar Wilde)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2745_1.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 20.062707220302915,
+    "time": 0.3429783809988294,
+    "accuracy": 1.0,
+    "decoded": "",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2731_0.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 11.21377310324675,
+    "time": 0.2539105270006985,
+    "accuracy": 0.0,
+    "decoded": "True friends stab you in the front. (Oscar Wilde)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2750_4.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 21.11876285904532,
+    "time": 0.3356954680020863,
+    "accuracy": 1.0,
+    "decoded": "",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2761_0.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 13.369270363691202,
+    "time": 0.27584831100102747,
+    "accuracy": 0.0,
+    "decoded": "True friends stab you in the front. (Oscar Wilde)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2766_9.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 32.59943433904431,
+    "time": 0.37017710199870635,
+    "accuracy": 1.0,
+    "decoded": "",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2762_2.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 20.293901599804013,
+    "time": 0.3152536849993339,
+    "accuracy": 1.0,
+    "decoded": "",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2769_2.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 35.494656489834846,
+    "time": 0.37535967599978903,
+    "accuracy": 0.0,
+    "decoded": "True friends stab you in the front. (Oscar Wilde)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2765_2.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 9.519475206273103,
+    "time": 0.2825862509998842,
+    "accuracy": 1.0,
+    "decoded": "",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2747_0.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 22.637711007252733,
+    "time": 0.34771215499858954,
+    "accuracy": 1.0,
+    "decoded": "",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2761_1.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 7.952333864284794,
+    "time": 0.2006101539991505,
+    "accuracy": 0.0,
+    "decoded": "True friends stab you in the front. (Oscar Wilde)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2754_1.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 12.647819509826881,
+    "time": 0.19402418800018495,
+    "accuracy": 0.0,
+    "decoded": "True friends stab you in the front. (Oscar Wilde)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2763_3.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 40.478997257415614,
+    "time": 0.5525039879976248,
+    "accuracy": 0.0,
+    "decoded": "Love is friendship, set on fire. (Jeremy Taylor)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2744_1.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 10.218582003185569,
+    "time": 0.20226644000285887,
+    "accuracy": 0.0,
+    "decoded": "True friends stab you in the front. (Oscar Wilde)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_3024_1.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 22.92303142837814,
+    "time": 0.3496557689977635,
+    "accuracy": 0.0,
+    "decoded": "True friends stab you in the front. (Oscar Wilde)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2756_0.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 7.511291598490749,
+    "time": 0.26886578599805944,
+    "accuracy": 1.0,
+    "decoded": "",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2730_0.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 14.994781395134428,
+    "time": 0.20086186100161285,
+    "accuracy": 0.0,
+    "decoded": "True friends stab you in the front. (Oscar Wilde)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2749_0.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 16.31228826032641,
+    "time": 0.2870125150002423,
+    "accuracy": 1.0,
+    "decoded": "",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_3029_0.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 21.39334793098432,
+    "time": 0.2995076839979447,
+    "accuracy": 0.0,
+    "decoded": "True friends stab you in the front. (Oscar Wilde)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2764_0.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 30.813331133622448,
+    "time": 0.4362813429979724,
+    "accuracy": 0.0,
+    "decoded": "True friends stab you in the front. (Oscar Wilde)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2770_0.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 23.541228715300914,
+    "time": 0.3485812619983335,
+    "accuracy": 0.0,
+    "decoded": "True friends stab you in the front. (Oscar Wilde)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2756_1.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 17.14961901717349,
+    "time": 0.30656619599903934,
+    "accuracy": 0.0,
+    "decoded": "True friends stab you in the front. (Oscar Wilde)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2768_0.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 10.467706632705996,
+    "time": 0.2060895540016645,
+    "accuracy": 0.0,
+    "decoded": "True friends stab you in the front. (Oscar Wilde)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2751_0.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 11.52457208609751,
+    "time": 0.26772953900217544,
+    "accuracy": 1.0,
+    "decoded": "",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2754_5.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 19.681413787850055,
+    "time": 0.3233641489969159,
+    "accuracy": 1.0,
+    "decoded": "",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_3044_0.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 11.574880643371904,
+    "time": 0.27286699599790154,
+    "accuracy": 0.0,
+    "decoded": "True friends stab you in the front. (Oscar Wilde)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2747_2.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 21.618235391744324,
+    "time": 0.32868682499974966,
+    "accuracy": 0.0,
+    "decoded": "True friends stab you in the front. (Oscar Wilde)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2764_2.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 29.10380073568226,
+    "time": 0.36972949000119115,
+    "accuracy": 1.0,
+    "decoded": "",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2762_3.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 34.36005968756639,
+    "time": 0.3963737410012982,
+    "accuracy": 0.0,
+    "decoded": "True friends stab you in the front. (Oscar Wilde)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2765_1.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 14.767516448451634,
+    "time": 0.3028535030025523,
+    "accuracy": 1.0,
+    "decoded": "",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2753_1.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 4.015694083296925,
+    "time": 0.23077119400113588,
+    "accuracy": 1.0,
+    "decoded": "",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_3044_2.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 16.537754992172925,
+    "time": 0.30962231300145504,
+    "accuracy": 1.0,
+    "decoded": "",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2759_2.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 12.242378805858843,
+    "time": 0.26269419100208324,
+    "accuracy": 0.0,
+    "decoded": "True friends stab you in the front. (Oscar Wilde)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2744_2.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 11.372161061151944,
+    "time": 0.26541192600052455,
+    "accuracy": 0.0,
+    "decoded": "True friends stab you in the front. (Oscar Wilde)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2766_10.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 14.717047224439874,
+    "time": 0.30390782799804583,
+    "accuracy": 1.0,
+    "decoded": "",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2768_1.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 18.43116462209167,
+    "time": 0.3307266109986813,
+    "accuracy": 0.0,
+    "decoded": "True friends stab you in the front. (Oscar Wilde)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2767_0.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 12.26104144955217,
+    "time": 0.208414292002999,
+    "accuracy": 0.0,
+    "decoded": "True friends stab you in the front. (Oscar Wilde)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2755_0.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 8.83025537482737,
+    "time": 0.19889925200186553,
+    "accuracy": 0.0,
+    "decoded": "True friends stab you in the front. (Oscar Wilde)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_3026_1.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 42.154141545826164,
+    "time": 0.3696475670003565,
+    "accuracy": 1.0,
+    "decoded": "",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2742_2.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 11.077288247817906,
+    "time": 0.18866114499905962,
+    "accuracy": 0.0,
+    "decoded": "Love is friendship, set on fire. (Jeremy Taylor)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_3070_1.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 14.100853797055784,
+    "time": 0.2784746260003885,
+    "accuracy": 0.0,
+    "decoded": "True friends stab you in the front. (Oscar Wilde)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2718_0.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 60.494853085223106,
+    "time": 0.5831482629982929,
+    "accuracy": 0.0,
+    "decoded": "Love is friendship, set on fire. (Jeremy Taylor)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2713_0.JPG"
+  },
+  {
+    "dataset": "Dubska",
+    "module_size": 9.722252898882193,
+    "time": 0.19852762699883897,
+    "accuracy": 0.0,
+    "decoded": "True friends stab you in the front. (Oscar Wilde)",
+    "expected": "",
+    "image_path": "/home/slava/PycharmProjects/qr_open_cv_proj/datasets/Dubska/images/QR_CODE/IMG_2763_11.JPG"
+  }
+]

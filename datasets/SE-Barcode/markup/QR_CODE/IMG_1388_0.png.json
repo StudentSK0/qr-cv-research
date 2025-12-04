@@ -1,0 +1,62 @@
+{
+  "document": {
+    "document_type": "barcode",
+    "templates": {
+      "barcode": {
+        "template_quad": [
+          [
+            0,
+            0
+          ],
+          [
+            1,
+            0
+          ],
+          [
+            1,
+            1
+          ],
+          [
+            0,
+            1
+          ]
+        ]
+      }
+    }
+  },
+  "props": {
+    "barcode": {
+      "class_name": "QR_CODE",
+      "module_size": [
+        [
+          3.853602899108336,
+          4.038963092063953
+        ],
+        [
+          3.7661313655324617,
+          3.940054413558455
+        ]
+      ],
+      "quad": [
+        [
+          6.75,
+          131.64999999999998
+        ],
+        [
+          134.75,
+          139.64999999999998
+        ],
+        [
+          141.75,
+          12.649999999999977
+        ],
+        [
+          11.75,
+          6.649999999999977
+        ]
+      ],
+      "symbology": "QR_CODE",
+      "value": "https://smartengines.com/https://smartengines.com/https://smartengines.com/h"
+    }
+  }
+}

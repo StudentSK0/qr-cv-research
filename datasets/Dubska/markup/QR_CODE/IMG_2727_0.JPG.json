@@ -1,0 +1,88 @@
+{
+  "document": {
+    "document_type": "barcode",
+    "templates": {
+      "barcode": {
+        "template_quad": [
+          [
+            0,
+            0
+          ],
+          [
+            1,
+            0
+          ],
+          [
+            1,
+            1
+          ],
+          [
+            0,
+            1
+          ]
+        ]
+      }
+    }
+  },
+  "props": {
+    "barcode": {
+      "alignment_patterns": [
+        [
+          300,
+          1000
+        ]
+      ],
+      "binary_data": "",
+      "class_name": "QR_CODE",
+      "dim1": "29",
+      "dim2": "29",
+      "finder_patterns": [
+        [
+          300,
+          200
+        ],
+        [
+          1500,
+          200
+        ],
+        [
+          1500,
+          1000
+        ]
+      ],
+      "foreground": "",
+      "module_size": [
+        [
+          37.694302479746824,
+          40.900511221063255
+        ],
+        [
+          37.4838518318472,
+          40.78855084074774
+        ]
+      ],
+      "private": "",
+      "public": "",
+      "quad": [
+        [
+          836.5,
+          76.25
+        ],
+        [
+          1648.5,
+          791.25
+        ],
+        [
+          894.5,
+          1601.25
+        ],
+        [
+          78.5,
+          844.25
+        ]
+      ],
+      "symbology": "QR_CODE",
+      "value": ""
+    }
+  }
+}

@@ -1,0 +1,62 @@
+{
+  "document": {
+    "document_type": "barcode",
+    "templates": {
+      "barcode": {
+        "template_quad": [
+          [
+            0,
+            0
+          ],
+          [
+            1,
+            0
+          ],
+          [
+            1,
+            1
+          ],
+          [
+            0,
+            1
+          ]
+        ]
+      }
+    }
+  },
+  "props": {
+    "barcode": {
+      "class_name": "QR_CODE",
+      "module_size": [
+        [
+          5.832803283214568,
+          6.706765354831217
+        ],
+        [
+          5.470499462543655,
+          6.284624908551079
+        ]
+      ],
+      "quad": [
+        [
+          42.0,
+          10.0
+        ],
+        [
+          189.0,
+          68.0
+        ],
+        [
+          147.0,
+          210.0
+        ],
+        [
+          9.0,
+          148.0
+        ]
+      ],
+      "symbology": "QR_CODE",
+      "value": "https://smartengin"
+    }
+  }
+}
