@@ -88,19 +88,3 @@ datasets/
 
 ```
 
-## Project Structure
-
-```
-project_root/
-│
-├── src/           # Source code: experiment and plotting scripts
-│    ├── experiment_qr_scaling.py
-│    └── plot_qr_results.py
-│
-├── data/          # Input QR images used in experiments
-│
-├── outputs/       # Generated results: CSV files and plots
-│
-├── README.md      # Project description and usage instructions
-└── .gitignore     # Git ignore rules
-```
