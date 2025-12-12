@@ -9,7 +9,38 @@ from pyzxing import BarCodeReader
 # Количество итераций декодирования для усреднения
 DECODE_ITERATIONS = 1
 
+# >>> ВАЖНО: шаг бининга (квантизации) размера модуля в пикселях
+# 1 -> просто округление до целого
+# 2/3/5 -> группировка по корзинам шага
+MODULE_BIN_STEP_PX = 2
+
 reader = BarCodeReader()  # Инициализация ZXing один раз
+
+
+def quantize_module_size_px(module_size_px: float, step_px: int = MODULE_BIN_STEP_PX) -> int:
+    """
+    Приводит module_size к целому числу пикселей и выполняет биннинг по step_px.
+
+    rounded = round(module_size_px)
+    q = round(rounded / step_px) * step_px  (если step_px > 1)
+
+    Пример:
+      module=3.7 -> rounded=4
+      step=2 -> q=4
+      step=5 -> q=5 или 0/10 (здесь: ближайшая корзина)
+    """
+    if module_size_px is None:
+        return None
+
+    if step_px < 1:
+        step_px = 1
+
+    rounded = int(np.rint(module_size_px))
+    if step_px == 1:
+        return rounded
+
+    q = int(np.rint(rounded / step_px) * step_px)
+    return q
 
 
 def get_module_size(markup_data):
@@ -37,7 +68,7 @@ def decode_qr_code_single(image_path: Path):
             parsed = parsed.decode("utf-8", errors="ignore")
         decoded = str(parsed)
 
-    return decoded, elapsed
+    return decoded, float(elapsed)
 
 
 def decode_qr_code(image_path: Path, iterations=DECODE_ITERATIONS):
@@ -59,8 +90,11 @@ def decode_qr_code(image_path: Path, iterations=DECODE_ITERATIONS):
 def select_dataset(project_root: Path) -> str:
     """Выбор папки датасета из project_root/datasets"""
     datasets_path = project_root / "datasets"
-    dataset_list = [d.name for d in datasets_path.iterdir() if d.is_dir()]
+    if not datasets_path.exists():
+        print("Папка datasets не найдена!")
+        return None
 
+    dataset_list = [d.name for d in datasets_path.iterdir() if d.is_dir()]
     if not dataset_list:
         print("Нет папок датасетов.")
         return None
@@ -75,7 +109,7 @@ def select_dataset(project_root: Path) -> str:
 
 
 def process_dataset(project_root: Path, dataset_name: str):
-    """Обрабатывает датасет по аналогии с OpenCV-версией."""
+    """Обрабатывает датасет по аналогии с OpenCV-версией (с биннингом module_size)."""
     results = []
 
     base = project_root / "datasets" / dataset_name
@@ -85,6 +119,7 @@ def process_dataset(project_root: Path, dataset_name: str):
     print(f"\nZXing: обработка датасета '{dataset_name}'")
     print(f"Изображения: {images}")
     print(f"Разметка:    {markup}")
+    print(f"Квантизация размера модуля: шаг = {MODULE_BIN_STEP_PX} px")
 
     if not images.exists() or not markup.exists():
         print("Ошибка: отсутствуют images/QR_CODE или markup/QR_CODE")
@@ -95,9 +130,13 @@ def process_dataset(project_root: Path, dataset_name: str):
         image_files.extend(images.glob(f"*{ext}"))
 
     processed = 0
+    skipped_no_markup = 0
+    skipped_bad_module = 0
+
     for img in image_files:
         meta = markup / f"{img.name}.json"
         if not meta.exists():
+            skipped_no_markup += 1
             continue
 
         try:
@@ -106,8 +145,15 @@ def process_dataset(project_root: Path, dataset_name: str):
         except Exception:
             continue
 
-        module_size = get_module_size(markup_data)
-        if module_size is None:
+        module_size_raw = get_module_size(markup_data)
+        if module_size_raw is None:
+            skipped_bad_module += 1
+            continue
+
+        # >>> ключевое изменение: целые пиксели + биннинг по шагу
+        module_size_px = quantize_module_size_px(module_size_raw, MODULE_BIN_STEP_PX)
+        if module_size_px is None:
+            skipped_bad_module += 1
             continue
 
         expected = str(markup_data['props']['barcode'].get('value', ""))
@@ -122,9 +168,10 @@ def process_dataset(project_root: Path, dataset_name: str):
 
         results.append({
             "dataset": dataset_name,
-            "module_size": module_size,
-            "time": decode_time,
-            "accuracy": avg_accuracy,
+            "module_size": int(module_size_px),          # <<< целое + бининг
+            "module_size_raw": float(module_size_raw),   # <<< сохраняем исходное
+            "time": float(decode_time),
+            "accuracy": float(avg_accuracy),
             "decoded": decoded_best,
             "expected": expected,
             "image_path": str(img)
@@ -135,6 +182,11 @@ def process_dataset(project_root: Path, dataset_name: str):
             print(f"Обработано: {processed}")
 
     print(f"Всего обработано: {processed}")
+    if skipped_no_markup:
+        print(f"Пропущено без разметки: {skipped_no_markup}")
+    if skipped_bad_module:
+        print(f"Пропущено из-за module_size: {skipped_bad_module}")
+
     return results
 
 

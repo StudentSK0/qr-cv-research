@@ -11,7 +11,7 @@ def select_json(project_root: Path):
     json_files = list(outputs_path.glob("qr_experiment_data_*.json"))
 
     if not json_files:
-        print("❌ Нет файлов данных для ZXing.")
+        print("Нет файлов данных для ZXing.")
         return None
 
     choices = [f.name for f in json_files]
@@ -26,49 +26,65 @@ def select_json(project_root: Path):
 
 
 def plot_interactive(results, out_path, dataset_name):
-    module_sizes = np.array([r['module_size'] for r in results])
-    times = np.array([r['time'] for r in results])
-    accuracies = np.array([r['accuracy'] for r in results])
+    module_sizes = np.array([r["module_size"] for r in results], dtype=float)
+    times = np.array([r["time"] for r in results], dtype=float)
+    accuracies = np.array([r["accuracy"] for r in results], dtype=float)
 
     uniq_m = np.sort(np.unique(module_sizes))
-    avg_time = [np.mean(times[module_sizes == m]) for m in uniq_m]
-    avg_acc = [np.mean(accuracies[module_sizes == m]) for m in uniq_m]
+    avg_time = np.array([np.mean(times[module_sizes == m]) for m in uniq_m], dtype=float)
+    avg_acc = np.array([np.mean(accuracies[module_sizes == m]) for m in uniq_m], dtype=float)
 
     avg_time_smooth = gaussian_filter1d(avg_time, sigma=2)
     avg_acc_smooth = gaussian_filter1d(avg_acc, sigma=2)
 
+    # --- Диапазоны осей: 0 по времени и 0 по точности на одном уровне ---
+    # y2 фиксируем от 0
+    y2_range = [0.0, 1.0]
+
+    # y1 тоже от 0, верх с небольшим запасом
+    if len(times) > 0:
+        max_time = float(np.max(times))
+        y1_top = max_time * 1.05 if max_time > 0 else 1.0
+    else:
+        y1_top = 1.0
+    y1_range = [0.0, y1_top]
+
     fig = go.Figure()
 
+    # Время - точки
     fig.add_trace(go.Scatter(
         x=module_sizes, y=times,
-        mode='markers',
-        name='Время (точки)',
-        marker=dict(color='blue', opacity=0.3),
-        yaxis='y1'
+        mode="markers",
+        name="Время (точки)",
+        marker=dict(color="blue", opacity=0.3),
+        yaxis="y"
     ))
 
+    # Время - тренд
     fig.add_trace(go.Scatter(
         x=uniq_m, y=avg_time_smooth,
-        mode='lines',
-        name='Тренд времени',
-        line=dict(color='navy', width=3),
-        yaxis='y1'
+        mode="lines",
+        name="Тренд времени",
+        line=dict(color="navy", width=3),
+        yaxis="y"
     ))
 
+    # Точность - точки
     fig.add_trace(go.Scatter(
         x=module_sizes, y=accuracies,
-        mode='markers',
-        name='Точность (точки)',
-        marker=dict(color='red', opacity=0.3),
-        yaxis='y2'
+        mode="markers",
+        name="Точность (точки)",
+        marker=dict(color="red", opacity=0.3),
+        yaxis="y2"
     ))
 
+    # Точность - тренд
     fig.add_trace(go.Scatter(
         x=uniq_m, y=avg_acc_smooth,
-        mode='lines',
-        name='Тренд точности',
-        line=dict(color='darkred', width=3, dash="dash"),
-        yaxis='y2'
+        mode="lines",
+        name="Тренд точности",
+        line=dict(color="darkred", width=3, dash="dash"),
+        yaxis="y2"
     ))
 
     fig.update_layout(
@@ -78,21 +94,29 @@ def plot_interactive(results, out_path, dataset_name):
         height=900,
         width=1600,
 
+        # X — линейная шкала (без log)
         xaxis=dict(
             title=dict(
-                text="Размер модуля",
+                text="Размер модуля (px)",
                 font=dict(color="black")
             ),
-            type="log"
+            type="linear",
+            zeroline=True
         ),
+
+        # y1 — время (сек), начало строго с 0
         yaxis=dict(
             title=dict(
                 text="Время декодирования (сек)",
                 font=dict(color="navy")
             ),
             tickfont=dict(color="navy"),
-            side="left"
+            side="left",
+            range=y1_range,
+            zeroline=True
         ),
+
+        # y2 — точность, начало строго с 0 (ноль совпадает по высоте с y1=0)
         yaxis2=dict(
             title=dict(
                 text="Точность",
@@ -101,8 +125,10 @@ def plot_interactive(results, out_path, dataset_name):
             tickfont=dict(color="darkred"),
             overlaying="y",
             side="right",
-            range=[0, 1.05]
+            range=y2_range,
+            zeroline=True
         ),
+
         legend=dict(
             x=1.02, y=1,
             bordercolor="gray", borderwidth=1
@@ -124,10 +150,13 @@ def main():
 
     dataset_name = json_file.stem.replace("qr_experiment_data_", "")
 
-    with open(json_file, 'r', encoding='utf-8') as f:
+    with open(json_file, "r", encoding="utf-8") as f:
         results = json.load(f)
 
-    out_path = project_root / "outputs" / "zxing_json_and_graphics" / f"interactive_plot_{dataset_name}.html"
+    out_path = (
+        project_root / "outputs" / "zxing_json_and_graphics"
+        / f"interactive_plot_{dataset_name}.html"
+    )
     plot_interactive(results, out_path, dataset_name)
 
 
