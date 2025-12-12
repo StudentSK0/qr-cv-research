@@ -26,16 +26,29 @@ def select_json(project_root: Path):
 
 
 def plot_interactive(results, out_path, dataset_name):
-    module_sizes = np.array([r['module_size'] for r in results])
-    times = np.array([r['time'] for r in results])
-    accuracies = np.array([r['accuracy'] for r in results])
+    module_sizes = np.array([r['module_size'] for r in results], dtype=float)
+    times = np.array([r['time'] for r in results], dtype=float)
+    accuracies = np.array([r['accuracy'] for r in results], dtype=float)
 
     uniq_m = np.sort(np.unique(module_sizes))
-    avg_time = [np.mean(times[module_sizes == m]) for m in uniq_m]
-    avg_acc = [np.mean(accuracies[module_sizes == m]) for m in uniq_m]
+    avg_time = np.array([np.mean(times[module_sizes == m]) for m in uniq_m], dtype=float)
+    avg_acc = np.array([np.mean(accuracies[module_sizes == m]) for m in uniq_m], dtype=float)
 
     avg_time_smooth = gaussian_filter1d(avg_time, sigma=2)
     avg_acc_smooth = gaussian_filter1d(avg_acc, sigma=2)
+
+    # --- диапазоны осей так, чтобы 0 совпадали по уровню ---
+    # y2 фиксируем [0, 1.0] (или [0, 1.05], но тогда "0" всё равно совпадает,
+    # просто верх чуть выше 1.0; вы просили именно про уровень нуля — это ок)
+    y2_range = [0.0, 1.0]
+
+    # y1 делаем [0, max_time] с небольшим запасом
+    if len(times) > 0:
+        max_time = float(np.max(times))
+        y1_top = max_time * 1.05 if max_time > 0 else 1.0
+    else:
+        y1_top = 1.0
+    y1_range = [0.0, y1_top]
 
     fig = go.Figure()
 
@@ -44,8 +57,8 @@ def plot_interactive(results, out_path, dataset_name):
         x=module_sizes, y=times,
         mode='markers',
         name='Время (точки)',
-        marker=dict(color='blue', opacity=0.3),
-        yaxis='y1'
+        marker=dict(color='blue', opacity=0.30),
+        yaxis='y'
     ))
 
     # Время - тренд
@@ -54,7 +67,7 @@ def plot_interactive(results, out_path, dataset_name):
         mode='lines',
         name='Тренд времени',
         line=dict(color='navy', width=3),
-        yaxis='y1'
+        yaxis='y'
     ))
 
     # Точность - точки
@@ -62,7 +75,7 @@ def plot_interactive(results, out_path, dataset_name):
         x=module_sizes, y=accuracies,
         mode='markers',
         name='Точность (точки)',
-        marker=dict(color='red', opacity=0.3),
+        marker=dict(color='red', opacity=0.30),
         yaxis='y2'
     ))
 
@@ -82,24 +95,34 @@ def plot_interactive(results, out_path, dataset_name):
         height=900,
         width=1600,
 
+        # X — линейная шкала (type не задаём или задаём 'linear')
         xaxis=dict(
-            title="Размер модуля",
-            type="log"
+            title="Размер модуля (px)",
+            type="linear",
+            zeroline=True
         ),
+
+        # y1 — время (с), низ строго 0
         yaxis=dict(
             title="Время декодирования (сек)",
-            titlefont=dict(color="navy"),
+            title_font=dict(color="navy"),
             tickfont=dict(color="navy"),
-            side="left"
+            side="left",
+            range=y1_range,
+            zeroline=True
         ),
+
+        # y2 — точность, низ строго 0 (совпадает по уровню с y1=0)
         yaxis2=dict(
             title="Точность",
-            titlefont=dict(color="darkred"),
+            title_font=dict(color="darkred"),
             tickfont=dict(color="darkred"),
             overlaying="y",
             side="right",
-            range=[0, 1.05]
+            range=y2_range,
+            zeroline=True
         ),
+
         legend=dict(
             x=1.02, y=1,
             bordercolor="gray", borderwidth=1
@@ -124,7 +147,10 @@ def main():
     with open(json_file, 'r', encoding='utf-8') as f:
         results = json.load(f)
 
-    out_path = project_root / "outputs" / "open_cv_json_and_graphics" / f"interactive_plot_{dataset_name}.html"
+    out_path = (
+        project_root / "outputs" / "open_cv_json_and_graphics"
+        / f"interactive_plot_{dataset_name}.html"
+    )
     plot_interactive(results, out_path, dataset_name)
 
 

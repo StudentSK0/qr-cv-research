@@ -10,6 +10,40 @@ from InquirerPy import inquirer
 # Количество итераций декодирования для усреднения
 DECODE_ITERATIONS = 3
 
+# >>> ВАЖНО: шаг бининга (квантизации) размера модуля в пикселях
+# Например: 1 -> просто округление до целого
+#           2 -> группировка по 2 px (0-1, 2-3, 4-5, ...)
+#           5 -> группировка по 5 px (0-4, 5-9, 10-14, ...)
+MODULE_BIN_STEP_PX = 2
+
+
+def quantize_module_size_px(module_size_px: float,
+                            step_px: int = MODULE_BIN_STEP_PX) -> int:
+    """
+    Приводит module_size к целому числу пикселей и выполняет биннинг
+    по заданному шагу (step_px).
+
+    Логика: округляем до ближайшего целого, затем привязываем к "корзине" шага:
+    - step=1:  3.7 -> 4
+    - step=2:  3.7 -> 4 -> 4 (корзина 4)
+    - step=5:  3.7 -> 4 -> 5? (зависит от метода; здесь используем ближайшую корзину)
+    """
+    if module_size_px is None:
+        return None
+
+    if step_px < 1:
+        step_px = 1
+
+    rounded = int(np.rint(module_size_px))  # ближайшее целое
+    if step_px == 1:
+        return rounded
+
+    # Привязка к ближайшему центру корзины:
+    # корзины: 0, step, 2*step, 3*step, ...
+    # rounded=7, step=5 -> 5 или 10 (ближайшая)
+    q = int(np.rint(rounded / step_px) * step_px)
+    return q
+
 
 def get_module_size(markup_data):
     """Извлекает средний размер модуля из файла разметки"""
@@ -19,8 +53,8 @@ def get_module_size(markup_data):
         all_values = []
         for pair in module_size:
             all_values.extend(pair)
-        return np.mean(all_values)
-    except (KeyError, TypeError):
+        return float(np.mean(all_values))
+    except (KeyError, TypeError, ValueError):
         return None
 
 
@@ -81,7 +115,7 @@ def decode_qr_code(image_path, iterations=DECODE_ITERATIONS):
     if not times:
         return None, None
 
-    return decoded_values, np.min(times)
+    return decoded_values, float(np.min(times))
 
 
 def select_dataset(project_root: Path) -> str:
@@ -125,6 +159,7 @@ def process_dataset(project_root: Path, dataset_name: str):
     print(f"\nОбработка датасета: {dataset_name}")
     print(f"   Путь к изображениям: {images_path}")
     print(f"   Путь к разметке:    {markup_path}")
+    print(f"   Квантизация размера модуля: шаг = {MODULE_BIN_STEP_PX} px")
 
     # Сбор всех картинок
     image_files = []
@@ -132,9 +167,13 @@ def process_dataset(project_root: Path, dataset_name: str):
         image_files.extend(images_path.glob(f"*{ext}"))
 
     processed = 0
+    skipped_no_markup = 0
+    skipped_bad_module = 0
+
     for image_file in image_files:
         markup_file = markup_path / f"{image_file.name}.json"
         if not markup_file.exists():
+            skipped_no_markup += 1
             continue
 
         try:
@@ -144,8 +183,15 @@ def process_dataset(project_root: Path, dataset_name: str):
             print(f"Ошибка чтения разметки {markup_file}: {e}")
             continue
 
-        module_size = get_module_size(markup_data)
-        if module_size is None:
+        module_size_raw = get_module_size(markup_data)
+        if module_size_raw is None:
+            skipped_bad_module += 1
+            continue
+
+        # >>> ключевое изменение: целые пиксели + биннинг по шагу
+        module_size_px = quantize_module_size_px(module_size_raw, MODULE_BIN_STEP_PX)
+        if module_size_px is None:
+            skipped_bad_module += 1
             continue
 
         try:
@@ -162,7 +208,7 @@ def process_dataset(project_root: Path, dataset_name: str):
             1.0 if str(d) == expected_value else 0.0
             for d in decoded_values
         ]
-        avg_accuracy = np.mean(accuracies) if accuracies else 0.0
+        avg_accuracy = float(np.mean(accuracies)) if accuracies else 0.0
 
         most_common_decoded = (
             Counter(decoded_values).most_common(1)[0][0]
@@ -171,8 +217,9 @@ def process_dataset(project_root: Path, dataset_name: str):
 
         results.append({
             "dataset": dataset_name,
-            "module_size": float(module_size),
-            "time": float(decode_time),   # в секундах, как в исходной версии
+            "module_size": int(module_size_px),          # <<< теперь это целое и квантизованное
+            "module_size_raw": float(module_size_raw),   # <<< оставляем исходное (для трассировки)
+            "time": float(decode_time),                  # в секундах
             "accuracy": float(avg_accuracy),
             "decoded": most_common_decoded,
             "expected": expected_value,
@@ -184,11 +231,16 @@ def process_dataset(project_root: Path, dataset_name: str):
             print(f"На текущий момент обработано: {processed} изображений")
 
     print(f"Всего обработано в {dataset_name}: {processed}")
+    if skipped_no_markup:
+        print(f"Пропущено без разметки: {skipped_no_markup}")
+    if skipped_bad_module:
+        print(f"Пропущено из-за module_size: {skipped_bad_module}")
+
     return results
 
 
 def main():
-    # qr_process_data_open_cv.py находится в project_root/src
+    # qr_process_data_open_cv.py находится в project_root/src/open_cv_programs
     # поднимаемся на уровень вверх → project_root
     script_path = Path(__file__).resolve()
     project_root = script_path.parent.parent.parent
