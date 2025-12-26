@@ -19,30 +19,18 @@ MODULE_BIN_STEP_PX = 2
 
 def quantize_module_size_px(module_size_px: float,
                             step_px: int = MODULE_BIN_STEP_PX) -> int:
-    """
-    Приводит module_size к целому числу пикселей и выполняет биннинг
-    по заданному шагу (step_px).
-
-    Логика: округляем до ближайшего целого, затем привязываем к "корзине" шага:
-    - step=1:  3.7 -> 4
-    - step=2:  3.7 -> 4 -> 4 (корзина 4)
-    - step=5:  3.7 -> 4 -> 5? (зависит от метода; здесь используем ближайшую корзину)
-    """
     if module_size_px is None:
         return None
 
     if step_px < 1:
         step_px = 1
 
-    rounded = int(np.rint(module_size_px))  # ближайшее целое
+    rounded = int(np.rint(module_size_px))
     if step_px == 1:
-        return rounded
+        return max(1, rounded)
 
-    # Привязка к ближайшему центру корзины:
-    # корзины: 0, step, 2*step, 3*step, ...
-    # rounded=7, step=5 -> 5 или 10 (ближайшая)
     q = int(np.rint(rounded / step_px) * step_px)
-    return q
+    return max(step_px, q)
 
 
 def get_module_size(markup_data):

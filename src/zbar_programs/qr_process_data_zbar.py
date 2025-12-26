@@ -1,10 +1,18 @@
 import json
 import time
+import cv2
 import numpy as np
 from pathlib import Path
 from collections import Counter
 from InquirerPy import inquirer
-from pyzxing import BarCodeReader
+
+try:
+    from pyzbar.pyzbar import decode as zbar_decode
+    from pyzbar.pyzbar import ZBarSymbol
+except ImportError as exc:
+    raise SystemExit(
+        "pyzbar не установлен. Установите зависимости проекта, чтобы использовать ZBar."
+    ) from exc
 
 # Количество итераций декодирования для усреднения
 DECODE_ITERATIONS = 3
@@ -14,21 +22,9 @@ DECODE_ITERATIONS = 3
 # 2/3/5 -> группировка по корзинам шага
 MODULE_BIN_STEP_PX = 2
 
-reader = BarCodeReader()  # Инициализация ZXing один раз
 
-
-def quantize_module_size_px(module_size_px: float, step_px: int = MODULE_BIN_STEP_PX) -> int:
-    """
-    Приводит module_size к целому числу пикселей и выполняет биннинг по step_px.
-
-    rounded = round(module_size_px)
-    q = round(rounded / step_px) * step_px  (если step_px > 1)
-
-    Пример:
-      module=3.7 -> rounded=4
-      step=2 -> q=4
-      step=5 -> q=5 или 0/10 (здесь: ближайшая корзина)
-    """
+def quantize_module_size_px(module_size_px: float,
+                            step_px: int = MODULE_BIN_STEP_PX) -> int:
     if module_size_px is None:
         return None
 
@@ -37,10 +33,10 @@ def quantize_module_size_px(module_size_px: float, step_px: int = MODULE_BIN_STE
 
     rounded = int(np.rint(module_size_px))
     if step_px == 1:
-        return rounded
+        return max(1, rounded)
 
     q = int(np.rint(rounded / step_px) * step_px)
-    return q
+    return max(step_px, q)
 
 
 def get_module_size(markup_data):
@@ -56,17 +52,22 @@ def get_module_size(markup_data):
 
 
 def decode_qr_code_single(image_path: Path):
-    """Декодирует QR один раз (ZXing). Возвращает (decoded_string, time_sec)."""
+    """Декодирует QR один раз (ZBar). Возвращает (decoded_string, time_sec)."""
+    img = cv2.imread(str(image_path))
+    if img is None:
+        return None, None
+
+    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     start = time.perf_counter()
-    result = reader.decode(str(image_path))
+    decoded_objects = zbar_decode(gray, symbols=[ZBarSymbol.QRCODE])
     elapsed = time.perf_counter() - start
 
     decoded = ""
-    if result and len(result) > 0:
-        parsed = result[0].get("parsed", "")
-        if isinstance(parsed, bytes):
-            parsed = parsed.decode("utf-8", errors="ignore")
-        decoded = str(parsed)
+    if decoded_objects:
+        data = decoded_objects[0].data
+        if isinstance(data, bytes):
+            data = data.decode("utf-8", errors="ignore")
+        decoded = str(data)
 
     return decoded, float(elapsed)
 
@@ -78,8 +79,9 @@ def decode_qr_code(image_path: Path, iterations=DECODE_ITERATIONS):
 
     for _ in range(iterations):
         decoded, t = decode_qr_code_single(image_path)
-        decoded_values.append(decoded)
-        times.append(t)
+        if t is not None:
+            decoded_values.append(decoded)
+            times.append(t)
 
     if not times:
         return None, None
@@ -100,7 +102,7 @@ def select_dataset(project_root: Path) -> str:
         return None
 
     dataset_name = inquirer.select(
-        message="Выберите датасет для ZXing:",
+        message="Выберите датасет для ZBar:",
         choices=dataset_list,
         default=dataset_list[0]
     ).execute()
@@ -116,7 +118,7 @@ def process_dataset(project_root: Path, dataset_name: str):
     images = base / "images" / "QR_CODE"
     markup = base / "markup" / "QR_CODE"
 
-    print(f"\nZXing: обработка датасета '{dataset_name}'")
+    print(f"\nZBar: обработка датасета '{dataset_name}'")
     print(f"Изображения: {images}")
     print(f"Разметка:    {markup}")
     print(f"Квантизация размера модуля: шаг = {MODULE_BIN_STEP_PX} px")
@@ -150,7 +152,6 @@ def process_dataset(project_root: Path, dataset_name: str):
             skipped_bad_module += 1
             continue
 
-        # >>> ключевое изменение: целые пиксели + биннинг по шагу
         module_size_px = quantize_module_size_px(module_size_raw, MODULE_BIN_STEP_PX)
         if module_size_px is None:
             skipped_bad_module += 1
@@ -168,8 +169,8 @@ def process_dataset(project_root: Path, dataset_name: str):
 
         results.append({
             "dataset": dataset_name,
-            "module_size": int(module_size_px),          # <<< целое + бининг
-            "module_size_raw": float(module_size_raw),   # <<< сохраняем исходное
+            "module_size": int(module_size_px),
+            "module_size_raw": float(module_size_raw),
             "time": float(decode_time),
             "accuracy": float(avg_accuracy),
             "decoded": decoded_best,
@@ -194,7 +195,7 @@ def main():
     script = Path(__file__).resolve()
     project_root = script.parent.parent.parent
 
-    print("\nЗапуск ZXing обработки")
+    print("\nЗапуск ZBar обработки")
     print(f"Корень проекта: {project_root}")
 
     dataset_name = select_dataset(project_root)
@@ -206,7 +207,7 @@ def main():
         print("Нет данных для сохранения")
         return
 
-    out_dir = project_root / "outputs" / "zxing_json_and_graphics"
+    out_dir = project_root / "outputs" / "zbar_json_and_graphics"
     out_dir.mkdir(parents=True, exist_ok=True)
 
     out_json = out_dir / f"qr_experiment_data_{dataset_name}.json"
@@ -214,7 +215,7 @@ def main():
         json.dump(results, f, indent=2, ensure_ascii=False)
 
     print(f"\nJSON сохранён: {out_json}")
-    print("Можно построить графики: qr_plot_results_zxing.py")
+    print("Можно построить графики (по аналогии с OpenCV/ZXing).")
 
 
 if __name__ == "__main__":
