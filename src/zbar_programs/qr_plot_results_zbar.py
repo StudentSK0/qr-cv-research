@@ -9,20 +9,20 @@ from InquirerPy import inquirer
 # --- настройки группировки по X ---
 # 1) округляем module_size до целого числа пикселей
 # 2) затем биним по шагу BIN_STEP_PX (1/2/3/5 и т.п.)
-BIN_STEP_PX = 1  # поменяйте на 2/3/5, если нужно укрупнить группы
+BIN_STEP_PX = 2  # поменяйте на 2/3/5, если нужно укрупнить группы
 
 
 def select_json(project_root: Path):
-    outputs_path = project_root / "outputs" / "zxing_json_and_graphics"
+    outputs_path = project_root / "outputs" / "zbar_json_and_graphics"
     json_files = list(outputs_path.glob("qr_experiment_data_*.json"))
 
     if not json_files:
-        print("Нет файлов данных для ZXing.")
+        print("Нет файлов данных.")
         return None
 
     choices = [f.name for f in json_files]
     selected = inquirer.select(
-        message="Выберите файл результатов ZXing:",
+        message="Выберите файл результатов (ZBar):",
         choices=choices,
         default=choices[0],
     ).execute()
@@ -40,21 +40,17 @@ def _bin_module_sizes_px(module_sizes: np.ndarray, step_px: int) -> np.ndarray:
     if step_px < 1:
         step_px = 1
 
-    module_px = np.rint(module_sizes).astype(int)  # округление до целого пикселя
-    module_bin = (np.rint(module_px / step_px) * step_px).astype(int)  # биннинг
+    module_px = np.rint(module_sizes).astype(int)
+    module_bin = (np.rint(module_px / step_px) * step_px).astype(int)
     return module_bin
 
 
 def plot_interactive(results, out_path: Path, dataset_name: str):
-    # --- читаем массивы ---
     module_sizes_raw = np.array([r["module_size"] for r in results], dtype=float)
     times = np.array([r["time"] for r in results], dtype=float)
     accuracies = np.array([r["accuracy"] for r in results], dtype=float)
 
-    # --- округление/биннинг module_size ---
     module_bins = _bin_module_sizes_px(module_sizes_raw, BIN_STEP_PX)
-
-    # --- группировка по module_bins ---
     uniq_m = np.sort(np.unique(module_bins))
 
     avg_time = []
@@ -74,7 +70,6 @@ def plot_interactive(results, out_path: Path, dataset_name: str):
         n = int(a_m.size)
         n_samples.append(n)
 
-        # Считаем только 0 и 1 (без "прочее")
         acc1 = int(np.sum(np.isclose(a_m, 1.0)))
         acc0 = int(np.sum(np.isclose(a_m, 0.0)))
 
@@ -84,22 +79,18 @@ def plot_interactive(results, out_path: Path, dataset_name: str):
     avg_time = np.array(avg_time, dtype=float)
     mean_acc = np.array(mean_acc, dtype=float)
 
-    # --- сглаживание тренда времени ---
     if len(avg_time) >= 5:
         avg_time_smooth = gaussian_filter1d(avg_time, sigma=2)
     else:
         avg_time_smooth = avg_time
 
-    # --- диапазон времени: снизу строго 0 ---
     max_time = float(np.max(times)) if times.size else 1.0
     y1_top = max_time * 1.05 if max_time > 0 else 1.0
     y1_range = [0.0, y1_top]
 
-    # --- диапазон для bar chart ---
     max_count = int(max(n_samples)) if n_samples else 1
     y_bar_top = max_count * 1.10 if max_count > 0 else 1
 
-    # --- фигура: (1) график времени + (2) столбчатая диаграмма + (3) таблица ---
     fig = make_subplots(
         rows=3,
         cols=1,
@@ -113,7 +104,6 @@ def plot_interactive(results, out_path: Path, dataset_name: str):
         ],
     )
 
-    # --- (1) время: точки ---
     fig.add_trace(
         go.Scatter(
             x=module_bins,
@@ -126,7 +116,6 @@ def plot_interactive(results, out_path: Path, dataset_name: str):
         col=1,
     )
 
-    # --- (1) время: тренд ---
     fig.add_trace(
         go.Scatter(
             x=uniq_m,
@@ -139,7 +128,6 @@ def plot_interactive(results, out_path: Path, dataset_name: str):
         col=1,
     )
 
-    # --- (2) столбики: counts accuracy=1/0 ---
     fig.add_trace(
         go.Bar(
             x=uniq_m,
@@ -160,7 +148,6 @@ def plot_interactive(results, out_path: Path, dataset_name: str):
         col=1,
     )
 
-    # --- (3) таблица точности ---
     mean_acc_pct = (mean_acc * 100.0).round(2)
 
     fig.add_trace(
@@ -194,10 +181,9 @@ def plot_interactive(results, out_path: Path, dataset_name: str):
         col=1,
     )
 
-    # --- layout ---
     step_note = f", bin step = {BIN_STEP_PX}px" if BIN_STEP_PX != 1 else ""
     fig.update_layout(
-        title=f"ZXing — влияние размера модуля на скорость и точность ({dataset_name})",
+        title=f"ZBar — влияние размера модуля на скорость и точность ({dataset_name})",
         title_font_size=24,
         template="plotly_white",
         height=1150,
@@ -212,7 +198,6 @@ def plot_interactive(results, out_path: Path, dataset_name: str):
         margin=dict(l=70, r=260, t=90, b=40),
     )
 
-    # X — линейная шкала
     fig.update_xaxes(
         title_text=f"Размер модуля (px){step_note}",
         type="linear",
@@ -228,7 +213,6 @@ def plot_interactive(results, out_path: Path, dataset_name: str):
         col=1,
     )
 
-    # Y (row 1) — время, снизу 0
     fig.update_yaxes(
         title_text="Время декодирования (сек)",
         range=y1_range,
@@ -237,7 +221,6 @@ def plot_interactive(results, out_path: Path, dataset_name: str):
         col=1,
     )
 
-    # Y (row 2) — количество изображений
     fig.update_yaxes(
         title_text="Количество изображений",
         range=[0, y_bar_top],
@@ -269,7 +252,7 @@ def main():
     out_path = (
         project_root
         / "outputs"
-        / "zxing_json_and_graphics"
+        / "zbar_json_and_graphics"
         / f"interactive_plot_{dataset_name}.html"
     )
     plot_interactive(results, out_path, dataset_name)
