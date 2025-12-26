@@ -1,4 +1,4 @@
-# QR Code Scaling Experiment
+# QR Code Recognition Experiment
 
 This project investigates how the size of the **minimum logical element** in a QR code—commonly referred to as the **module**—affects decoding accuracy.  
 A *module* is a single cell within a matrix barcode symbol, representing one bit of encoded information.
