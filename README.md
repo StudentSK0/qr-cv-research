@@ -5,7 +5,7 @@ A *module* is a single cell within a matrix barcode symbol, representing one bit
 
 ## Practical Value
 
-The results of this study are valuable for engineers, system integrators, and users of scanning systems, providing insights into optimal QR code sizing and robustness under real-world conditions.
+The results of this study are sizes of the module that are optimal for recognition in different scanner systems (zxing, zbar and open cv decoder). These parameters were obtained experimentally.
 
 ## Installation
 
