@@ -19,7 +19,7 @@ The results of this study are valuable for engineers, system integrators, and us
 Clone the repository:
 
 bash
-git clone https://github.com/YOUR_USERNAME/qr-open-cv-experiments.git
+git clone https://https://github.com/StudentSK0/qr-cv-research/qr-open-cv-experiments.git
 cd qr-open-cv-experiments
 
 
