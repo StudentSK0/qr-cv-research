@@ -18,21 +18,21 @@ The results of this study are valuable for engineers, system integrators, and us
 
 Clone the repository:
 
-```bash
+bash
 git clone https://github.com/YOUR_USERNAME/qr-open-cv-experiments.git
 cd qr-open-cv-experiments
-```
+
 
 Create and activate a virtual environment:
 
-```bash
+bash
 python3 -m venv .venv
 source .venv/bin/activate
-```
+
 
 Install required dependencies:
 
-```bash
+bash
 pip install -r requirements.txt
 ```
 
@@ -40,6 +40,25 @@ pip install -r requirements.txt
 ## Project Structure
 
 ```
+
+System dependency for ZBar (needed for the zbar engine):
+
+```bash
+# Ubuntu / Debian
+sudo apt-get update
+sudo apt-get install -y libzbar0
+
+# macOS
+brew install zbar
+```
+
+Run web UI:
+
+```bash
+python3 -m src.qr_core.web_app
+```
+
+
 qr_open_cv_proj/
 ├── .venv/                             # Python virtual environment
 │
@@ -61,10 +80,10 @@ qr_open_cv_proj/
 ├── .gitignore                         # Git ignore rules
 └── README.md                          # Project documentation
 
-```
+
 
 ## datasets Directory Structure
-```
+
 datasets/
 ├── Dubska/                       
 │   ├── images/
@@ -86,5 +105,5 @@ datasets/
     └── markup/
         └── QR_CODE/               # Image annotations
 
-```
+
 
