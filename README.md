@@ -11,16 +11,11 @@ The results of this study are valuable for engineers, system integrators, and us
 
 1) Clone the repository
 
-<<<<<<< HEAD
-bash
-git clone https://https://github.com/StudentSK0/qr-cv-research/qr-open-cv-experiments.git
-cd qr-open-cv-experiments
-=======
+
 ```bash
 git clone https://github.com/StudentSK0/qr-cv-research
 cd qr-cv-research
 ````
->>>>>>> 13f7f20 (Update README and delete existing dataset)
 
 2) Create and activate a virtual environment
 
