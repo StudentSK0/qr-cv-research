@@ -867,19 +867,26 @@ JOBS_LOCK = threading.Lock()
 
 
 def _is_project_root(path: Path) -> bool:
-    return (path / "datasets").is_dir() and (path / "src").is_dir()
+    return (path / "src").is_dir()
 
 
 def _resolve_project_root() -> Path:
     cwd = Path.cwd()
     if _is_project_root(cwd):
+        _ensure_project_dirs(cwd)
         return cwd
 
     fallback = Path(__file__).resolve().parents[2]
     if _is_project_root(fallback):
+        _ensure_project_dirs(fallback)
         return fallback
 
-    raise RuntimeError("Cannot locate project root. Expected datasets/ and src/.")
+    raise RuntimeError("Cannot locate project root. Expected src/.")
+
+
+def _ensure_project_dirs(project_root: Path) -> None:
+    (project_root / "datasets").mkdir(parents=True, exist_ok=True)
+    (project_root / "outputs").mkdir(parents=True, exist_ok=True)
 
 
 def _parse_positive_int(value: str | None, default: int) -> int:
