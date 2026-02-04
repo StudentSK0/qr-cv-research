@@ -48,6 +48,8 @@ brew install zbar
 ```bash
 python3 -m src.qr_core.web_app
 ```
+6) Open the web UI at http://127.0.0.1:8000 in your browser.
+
 
 ## Expected Dataset Structure
 
