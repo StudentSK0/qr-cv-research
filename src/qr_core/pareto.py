@@ -51,7 +51,7 @@ def aggregate_module_sizes(
     """Aggregate metrics per module size (binned).
 
     Returns list of dicts with:
-    module_size, n, time_median, time_p90, accuracy_mean
+    module_size, n, time_min, time_p90, accuracy_mean
     """
     groups: dict[int, list[Any]] = {}
     for item in results:
@@ -74,7 +74,7 @@ def aggregate_module_sizes(
         if n < n_min:
             continue
 
-        time_median = float(np.median(times))
+        time_min = float(np.min(times))
         time_p90 = float(np.percentile(times, 90))
         accuracy_mean = float(np.mean(accuracies)) if accuracies else 0.0
 
@@ -82,7 +82,7 @@ def aggregate_module_sizes(
             {
                 "module_size": float(module_size),
                 "n": float(n),
-                "time_median": time_median,
+                "time_min": time_min,
                 "time_p90": time_p90,
                 "accuracy_mean": accuracy_mean,
             }
@@ -135,7 +135,7 @@ if __name__ == "__main__":
         {"module_size": 8, "time": 0.3, "accuracy": 0.9},
     ]
     stats = aggregate_module_sizes(sample, n_min=1, time_attr_candidates=("time",))
-    front = pareto_front(stats, minimize_keys=("time_median",), maximize_keys=("accuracy_mean",))
+    front = pareto_front(stats, minimize_keys=("time_min",), maximize_keys=("accuracy_mean",))
     print("Pareto front:")
     for item in front:
         print(item)

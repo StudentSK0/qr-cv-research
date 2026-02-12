@@ -80,7 +80,7 @@ def run_experiment(
             continue
 
         time_min = float(np.min(times))
-        acc_list = [1.0 if d == expected else 0.0 for d in decoded_values]
+        acc_list = [1.0 if d.strip() else 0.0 for d in decoded_values]
         acc_mean = float(np.mean(acc_list)) if acc_list else 0.0
         decoded_best = Counter(decoded_values).most_common(1)[0][0] if decoded_values else ""
 

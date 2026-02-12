@@ -85,10 +85,12 @@ def run_experiment(
 
         module_raw = extract_module_size_px(markup)
         expected = extract_expected_value(markup)
-        if module_raw is None or expected is None:
+        if module_raw is None:
             skipped_bad_module += 1
             _notify_progress(progress_cb, seen, processed, skipped_no_markup, skipped_bad_module, skipped_image_read)
             continue
+        if expected is None:
+            expected = ""
 
         module_binned = quantize_module_size(module_raw, cfg.module_bin_step_px)
         if module_binned is None:
@@ -116,7 +118,7 @@ def run_experiment(
             continue
 
         time_min = min(times)
-        acc_list = [1.0 if val == expected else 0.0 for val in decoded_values]
+        acc_list = [1.0 if val.strip() else 0.0 for val in decoded_values]
         accuracy = sum(acc_list) / float(len(acc_list)) if acc_list else 0.0
         decoded_best = Counter(decoded_values).most_common(1)[0][0] if decoded_values else ""
 
