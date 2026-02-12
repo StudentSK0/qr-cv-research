@@ -1281,6 +1281,11 @@ RESULT_TEMPLATE = """<!doctype html>
         font-size: 0.8rem;
         color: #334155;
         text-align: right;
+        white-space: pre-line;
+      }
+      .modal__label {
+        color: #0f766e;
+        font-weight: 600;
       }
     </style>
   </head>
@@ -1308,7 +1313,7 @@ RESULT_TEMPLATE = """<!doctype html>
         </div>
       </div>
       <div class="card">
-        <iframe src="{{ plot_url }}"></iframe>
+        <iframe src="{{ plot_url_embed }}"></iframe>
       </div>
     </div>
   
@@ -1369,9 +1374,10 @@ RESULT_TEMPLATE = """<!doctype html>
             details.className = "modal__details";
 
             const link = document.createElement("a");
-            link.textContent = item.image_path || "(unknown path)";
-            if (item.image_path) {
-              const href = `/api/datasets/${encodeURIComponent(dataset)}/image?path=${encodeURIComponent(item.image_path)}`;
+            const normalizedPath = normalizeImagePath(item.image_path);
+            link.textContent = normalizedPath || item.image_path || "(unknown path)";
+            if (normalizedPath) {
+              const href = `/api/datasets/${encodeURIComponent(dataset)}/image?path=${encodeURIComponent(normalizedPath)}`;
               link.href = href;
               link.target = "_blank";
               link.rel = "noopener";
@@ -1396,7 +1402,7 @@ RESULT_TEMPLATE = """<!doctype html>
             const result = document.createElement("div");
             result.className = "modal__result";
 
-            btn.addEventListener("click", () => runSingle(item.image_path, btn, result));
+            btn.addEventListener("click", () => runSingle(normalizedPath || item.image_path, btn, result));
 
             action.appendChild(btn);
             action.appendChild(result);
@@ -1407,6 +1413,30 @@ RESULT_TEMPLATE = """<!doctype html>
           }
           list.appendChild(frag);
         }
+
+        function escapeHtml(value) {
+          return String(value)
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#39;");
+        }
+
+        function normalizeImagePath(path) {
+          if (!path) return "";
+          let p = String(path).replace(/\\\\/g, "/");
+          p = p.replace(/^\/+/, "");
+          const prefix = `datasets/${dataset}/`;
+          if (p.startsWith(prefix)) {
+            p = p.slice(prefix.length);
+          }
+          if (p.startsWith("images/QR_CODE/")) {
+            p = p.slice("images/QR_CODE/".length);
+          }
+          return p;
+        }
+
 
         async function runSingle(imagePath, button, resultEl) {
           if (!imagePath) {
@@ -1428,7 +1458,14 @@ RESULT_TEMPLATE = """<!doctype html>
             }
             const time = data.time_total_min_sec != null ? data.time_total_min_sec.toFixed(6) : "n/a";
             const acc = data.accuracy != null ? data.accuracy.toFixed(3) : "n/a";
-            resultEl.textContent = `acc=${acc}, time=${time}s, best=${data.decoded_best || ""}`;
+            const decoded = data.decoded || data.decoded_best || "";
+            const expected = data.expected || "";
+            resultEl.innerHTML = [
+              `<span class="modal__label">time</span> = ${time}s`,
+              `<span class="modal__label">accuracy</span> = ${acc}`,
+              `<span class="modal__label">decoded</span> = "${escapeHtml(decoded)}"`,
+              `<span class="modal__label">expected</span> (if provided) = "${escapeHtml(expected)}"`,
+            ].join("<br>");
           } catch (err) {
             resultEl.textContent = "Request failed.";
           } finally {
@@ -1443,9 +1480,15 @@ RESULT_TEMPLATE = """<!doctype html>
           openModal();
           try {
             const resp = await fetch(`/api/jobs/${jobId}/samples?bin=${encodeURIComponent(binValue)}&outcome=${encodeURIComponent(outcome)}`);
-            const data = await resp.json();
+            const raw = await resp.text();
+            let data = null;
+            try {
+              data = JSON.parse(raw);
+            } catch (err) {
+              data = null;
+            }
             if (!resp.ok) {
-              status.textContent = data && data.error ? data.error : "Failed to load samples.";
+              status.textContent = data && data.error ? data.error : ("Failed to load samples (" + resp.status + ").");
               return;
             }
             if (!Array.isArray(data)) {
@@ -1510,6 +1553,15 @@ RESULT_TEMPLATE = """<!doctype html>
                   outcome = "correct";
                 }
                 if (!outcome) {
+                  if (traceName.includes("time total min")) {
+                    const imagePath = normalizeImagePath(point.customdata);
+                    if (!imagePath) {
+                      return;
+                    }
+                    title.textContent = `Sample: ${imagePath}`;
+                    renderList([{ image_path: imagePath, time_total_min_sec: point.y }]);
+                    openModal();
+                  }
                   return;
                 }
                 const binValue = parseInt(point.x, 10);
@@ -1955,6 +2007,7 @@ def create_app(project_root: Path | None = None) -> Flask:
             abort(500)
 
         plot_url = url_for("serve_output", engine=job["engine"], filename=job["html_file"], job_id=job_id)
+        plot_url_embed = f"{plot_url}&embed=1"
         json_url = url_for("serve_output", engine=job["engine"], filename=job["json_file"])
 
         return render_template_string(
@@ -1966,6 +2019,7 @@ def create_app(project_root: Path | None = None) -> Flask:
             bin_step_px=job["bin_step_px"],
             summary=job["summary"],
             plot_url=plot_url,
+            plot_url_embed=plot_url_embed,
             json_url=json_url,
         )
 
@@ -2074,7 +2128,10 @@ def create_app(project_root: Path | None = None) -> Flask:
         if not rel_path:
             return jsonify({"error": "Missing required query param: path."}), 400
 
-        normalized = rel_path.replace("\\", "/")
+        normalized = rel_path.replace("\\", "/").lstrip("/")
+        dataset_prefix = f"datasets/{safe_dataset}/"
+        if normalized.startswith(dataset_prefix):
+            normalized = normalized[len(dataset_prefix):]
         prefix = "images/QR_CODE/"
         if normalized.startswith(prefix):
             normalized = normalized[len(prefix):]
@@ -2148,7 +2205,7 @@ def create_app(project_root: Path | None = None) -> Flask:
             return jsonify({"error": "Failed to read markup."}), 400
         expected = extract_expected_value(markup)
         if expected is None:
-            return jsonify({"error": "Expected value missing in markup."}), 400
+            expected = ""
 
         try:
             engine = ENGINE_REGISTRY[engine_key]()
@@ -2171,12 +2228,15 @@ def create_app(project_root: Path | None = None) -> Flask:
 
         time_min = min(times)
         decoded_best = Counter(decoded_values).most_common(1)[0][0] if decoded_values else ""
-        accuracy = 1 if decoded_best == expected else 0
+        success_list = [1.0 if val.strip() else 0.0 for val in decoded_values]
+        accuracy = sum(success_list) / float(len(success_list)) if success_list else 0.0
 
         return jsonify(
             {
                 "decoded_values": decoded_values,
                 "decoded_best": decoded_best,
+                "decoded": decoded_best,
+                "expected": expected,
                 "time_total_min_sec": float(time_min),
                 "accuracy": int(accuracy),
             }
@@ -2208,12 +2268,17 @@ def create_app(project_root: Path | None = None) -> Flask:
             if job is None:
                 with JOBS_LOCK:
                     matches = [(jid, j) for jid, j in JOBS.items() if j.get("html_file") == filename]
-                if len(matches) == 1:
-                    job_id, job = matches[0]
+                if matches:
+                    job_id, job = matches[-1]
 
-            if job:
+            if job and request.args.get("embed") != "1":
                 html = _inject_plot_drilldown(html, job_id, job.get("dataset", ""))
-            return html.encode("utf-8"), 200, {"Content-Type": "text/html; charset=utf-8"}
+            return html.encode("utf-8"), 200, {
+                "Content-Type": "text/html; charset=utf-8",
+                "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0",
+                "Pragma": "no-cache",
+                "Expires": "0",
+            }
 
         return file_path.read_bytes(), 200, {"Content-Type": _content_type(file_path)}
 
@@ -2224,7 +2289,334 @@ def _inject_plot_drilldown(html: str, job_id: str, dataset: str) -> str:
     if "</body>" not in html:
         return html
 
-    template = '    <style>\n      .modal {\n        position: fixed;\n        inset: 0;\n        background: rgba(15, 23, 42, 0.45);\n        display: none;\n        align-items: center;\n        justify-content: center;\n        z-index: 999;\n      }\n      .modal.open {\n        display: flex;\n      }\n      .modal__content {\n        width: min(900px, 92vw);\n        max-height: 85vh;\n        background: #ffffff;\n        border-radius: 14px;\n        box-shadow: 0 24px 80px rgba(15, 23, 42, 0.25);\n        padding: 18px 20px 20px;\n        overflow: auto;\n      }\n      .modal__header {\n        display: flex;\n        align-items: center;\n        justify-content: space-between;\n        gap: 12px;\n        margin-bottom: 8px;\n      }\n      .modal__title {\n        font-size: 18px;\n        font-weight: 600;\n        color: #0f172a;\n      }\n      .modal__close {\n        border: none;\n        background: #e2e8f0;\n        color: #0f172a;\n        border-radius: 999px;\n        width: 32px;\n        height: 32px;\n        cursor: pointer;\n        font-size: 18px;\n        line-height: 1;\n      }\n      .modal__status {\n        font-size: 14px;\n        color: #475569;\n        margin-bottom: 10px;\n      }\n      .modal__list {\n        list-style: none;\n        padding: 0;\n        margin: 0;\n        display: grid;\n        gap: 10px;\n      }\n      .modal__item {\n        display: flex;\n        align-items: center;\n        justify-content: space-between;\n        gap: 12px;\n        border: 1px solid #e2e8f0;\n        border-radius: 10px;\n        padding: 10px 12px;\n      }\n      .modal__item a {\n        color: #0f766e;\n        text-decoration: none;\n        font-weight: 500;\n      }\n      .modal__item a:hover {\n        text-decoration: underline;\n      }\n      .modal__details {\n        display: flex;\n        flex-direction: column;\n        gap: 4px;\n        font-size: 0.85rem;\n        color: #475569;\n      }\n      .modal__meta {\n        font-size: 0.8rem;\n        color: #64748b;\n      }\n      .modal__action {\n        display: flex;\n        flex-direction: column;\n        gap: 6px;\n        align-items: flex-end;\n      }\n      .modal__button {\n        border: none;\n        background: #0f8b8d;\n        color: #ffffff;\n        padding: 6px 10px;\n        border-radius: 10px;\n        cursor: pointer;\n        font-size: 0.85rem;\n      }\n      .modal__button:disabled {\n        opacity: 0.6;\n        cursor: not-allowed;\n      }\n      .modal__result {\n        font-size: 0.8rem;\n        color: #334155;\n        text-align: right;\n      }\n    </style>\n    <div id="drilldownModal" class="modal">\n      <div class="modal__content" role="dialog" aria-modal="true" aria-labelledby="drilldownTitle">\n        <div class="modal__header">\n          <div id="drilldownTitle" class="modal__title">Samples</div>\n          <button id="drilldownClose" class="modal__close" type="button">×</button>\n        </div>\n        <div id="drilldownStatus" class="modal__status"></div>\n        <ul id="drilldownList" class="modal__list"></ul>\n      </div>\n    </div>\n\n    <script>\n      (function () {\n        const jobId = "__JOB_ID__";\n        const dataset = "__DATASET__";\n        const modal = document.getElementById("drilldownModal");\n        const list = document.getElementById("drilldownList");\n        const status = document.getElementById("drilldownStatus");\n        const title = document.getElementById("drilldownTitle");\n        const closeBtn = document.getElementById("drilldownClose");\n\n        function openModal() {\n          modal.classList.add("open");\n        }\n\n        function closeModal() {\n          modal.classList.remove("open");\n        }\n\n        closeBtn.addEventListener("click", closeModal);\n        modal.addEventListener("click", (event) => {\n          if (event.target === modal) {\n            closeModal();\n          }\n        });\n\n        function renderList(items) {\n          list.innerHTML = "";\n          if (!items.length) {\n            status.textContent = "No samples found for this bin/outcome.";\n            return;\n          }\n          status.textContent = `Found ${items.length} samples.`;\n          const frag = document.createDocumentFragment();\n          for (const item of items) {\n            const li = document.createElement("li");\n            li.className = "modal__item";\n\n            const details = document.createElement("div");\n            details.className = "modal__details";\n\n            const link = document.createElement("a");\n            link.textContent = item.image_path || "(unknown path)";\n            if (item.image_path) {\n              const href = `/api/datasets/${encodeURIComponent(dataset)}/image?path=${encodeURIComponent(item.image_path)}`;\n              link.href = href;\n              link.target = "_blank";\n              link.rel = "noopener";\n            }\n\n            const meta = document.createElement("div");\n            meta.className = "modal__meta";\n            const time = item.time_total_min_sec != null ? item.time_total_min_sec.toFixed(6) : "n/a";\n            meta.textContent = `time=${time}s`;\n\n            details.appendChild(link);\n            details.appendChild(meta);\n\n            const action = document.createElement("div");\n            action.className = "modal__action";\n\n            const btn = document.createElement("button");\n            btn.type = "button";\n            btn.className = "modal__button";\n            btn.textContent = "Run on this image";\n\n            const result = document.createElement("div");\n            result.className = "modal__result";\n\n            btn.addEventListener("click", () => runSingle(item.image_path, btn, result));\n\n            action.appendChild(btn);\n            action.appendChild(result);\n\n            li.appendChild(details);\n            li.appendChild(action);\n            frag.appendChild(li);\n          }\n          list.appendChild(frag);\n        }\n\n        async function runSingle(imagePath, button, resultEl) {\n          if (!imagePath) {\n            resultEl.textContent = "Missing image path.";\n            return;\n          }\n          button.disabled = true;\n          resultEl.textContent = "Running...";\n          try {\n            const resp = await fetch(`/api/jobs/${jobId}/run_single`, {\n              method: "POST",\n              headers: { "Content-Type": "application/json" },\n              body: JSON.stringify({ image_path: imagePath }),\n            });\n            const data = await resp.json();\n            if (!resp.ok) {\n              resultEl.textContent = data && data.error ? data.error : "Failed.";\n              return;\n            }\n            const time = data.time_total_min_sec != null ? data.time_total_min_sec.toFixed(6) : "n/a";\n            const acc = data.accuracy != null ? data.accuracy.toFixed(3) : "n/a";\n            resultEl.textContent = `acc=${acc}, time=${time}s, best=${data.decoded_best || ""}`;\n          } catch (err) {\n            resultEl.textContent = "Request failed.";\n          } finally {\n            button.disabled = false;\n          }\n        }\n\n        async function fetchSamples(binValue, outcome) {\n          title.textContent = `Samples: bin ${binValue} / ${outcome}`;\n          status.textContent = "Loading...";\n          list.innerHTML = "";\n          openModal();\n          try {\n            const resp = await fetch(`/api/jobs/${jobId}/samples?bin=${encodeURIComponent(binValue)}&outcome=${encodeURIComponent(outcome)}`);\n            const data = await resp.json();\n            if (!resp.ok) {\n              status.textContent = data && data.error ? data.error : "Failed to load samples.";\n              return;\n            }\n            if (!Array.isArray(data)) {\n              status.textContent = "Unexpected response format.";\n              return;\n            }\n            renderList(data);\n          } catch (err) {\n            status.textContent = "Request failed.";\n          }\n        }\n\n        function attachPlotlyHandler() {\n          const plot = document.querySelector(".plotly-graph-div");\n          if (!plot || !plot.on) {\n            return;\n          }\n          plot.on("plotly_click", (event) => {\n            if (!event || !event.points || !event.points.length) {\n              return;\n            }\n            const point = event.points[0];\n            const traceName = (point.data && point.data.name ? point.data.name : "").toLowerCase();\n            let outcome = null;\n            if (traceName.includes("failed")) {\n              outcome = "failed";\n            } else if (traceName.includes("correct")) {\n              outcome = "correct";\n            }\n            if (!outcome) {\n              return;\n            }\n            const binValue = parseInt(point.x, 10);\n            if (!Number.isFinite(binValue)) {\n              return;\n            }\n            fetchSamples(binValue, outcome);\n          });\n        }\n\n        attachPlotlyHandler();\n      })();\n    </script>'
+    template = """    <style>
+      .modal {
+        position: fixed;
+        inset: 0;
+        background: rgba(15, 23, 42, 0.45);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 999;
+      }
+      .modal.open {
+        display: flex;
+      }
+      .modal__content {
+        width: min(900px, 92vw);
+        max-height: 85vh;
+        background: #ffffff;
+        border-radius: 14px;
+        box-shadow: 0 24px 80px rgba(15, 23, 42, 0.25);
+        padding: 18px 20px 20px;
+        overflow: auto;
+      }
+      .modal__header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 8px;
+      }
+      .modal__title {
+        font-size: 18px;
+        font-weight: 600;
+        color: #0f172a;
+      }
+      .modal__close {
+        border: none;
+        background: #e2e8f0;
+        color: #0f172a;
+        border-radius: 999px;
+        width: 32px;
+        height: 32px;
+        cursor: pointer;
+        font-size: 18px;
+        line-height: 1;
+      }
+      .modal__status {
+        font-size: 14px;
+        color: #475569;
+        margin-bottom: 10px;
+      }
+      .modal__list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        display: grid;
+        gap: 10px;
+      }
+      .modal__item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        padding: 10px 12px;
+      }
+      .modal__item a {
+        color: #0f766e;
+        text-decoration: none;
+        font-weight: 500;
+      }
+      .modal__item a:hover {
+        text-decoration: underline;
+      }
+      .modal__details {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        font-size: 0.85rem;
+        color: #475569;
+      }
+      .modal__meta {
+        font-size: 0.8rem;
+        color: #64748b;
+      }
+      .modal__action {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        align-items: flex-end;
+      }
+      .modal__button {
+        border: none;
+        background: #0f8b8d;
+        color: #ffffff;
+        padding: 6px 10px;
+        border-radius: 10px;
+        cursor: pointer;
+        font-size: 0.85rem;
+      }
+      .modal__button:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
+      .modal__result {
+        font-size: 0.8rem;
+        color: #334155;
+        text-align: right;
+        white-space: pre-line;
+      }
+      .modal__label {
+        color: #0f766e;
+        font-weight: 600;
+      }
+    </style>
+    <div id="drilldownModal" class="modal">
+      <div class="modal__content" role="dialog" aria-modal="true" aria-labelledby="drilldownTitle">
+        <div class="modal__header">
+          <div id="drilldownTitle" class="modal__title">Samples</div>
+          <button id="drilldownClose" class="modal__close" type="button">×</button>
+        </div>
+        <div id="drilldownStatus" class="modal__status"></div>
+        <ul id="drilldownList" class="modal__list"></ul>
+      </div>
+    </div>
+
+    <script>
+      (function () {
+        const jobId = "__JOB_ID__";
+        const dataset = "__DATASET__";
+        const modal = document.getElementById("drilldownModal");
+        const list = document.getElementById("drilldownList");
+        const status = document.getElementById("drilldownStatus");
+        const title = document.getElementById("drilldownTitle");
+        const closeBtn = document.getElementById("drilldownClose");
+
+        function openModal() {
+          modal.classList.add("open");
+        }
+
+        function closeModal() {
+          modal.classList.remove("open");
+        }
+
+        closeBtn.addEventListener("click", closeModal);
+        modal.addEventListener("click", (event) => {
+          if (event.target === modal) {
+            closeModal();
+          }
+        });
+
+        function renderList(items) {
+          list.innerHTML = "";
+          if (!items.length) {
+            status.textContent = "No samples found for this bin/outcome.";
+            return;
+          }
+          status.textContent = `Found ${items.length} samples.`;
+          const frag = document.createDocumentFragment();
+          for (const item of items) {
+            const li = document.createElement("li");
+            li.className = "modal__item";
+
+            const details = document.createElement("div");
+            details.className = "modal__details";
+
+            const link = document.createElement("a");
+            const normalizedPath = normalizeImagePath(item.image_path);
+            link.textContent = normalizedPath || item.image_path || "(unknown path)";
+            if (normalizedPath) {
+              const href = `/api/datasets/${encodeURIComponent(dataset)}/image?path=${encodeURIComponent(normalizedPath)}`;
+              link.href = href;
+              link.target = "_blank";
+              link.rel = "noopener";
+            }
+
+            const meta = document.createElement("div");
+            meta.className = "modal__meta";
+            const time = item.time_total_min_sec != null ? item.time_total_min_sec.toFixed(6) : "n/a";
+            meta.textContent = `time=${time}s`;
+
+            details.appendChild(link);
+            details.appendChild(meta);
+
+            const action = document.createElement("div");
+            action.className = "modal__action";
+
+            const btn = document.createElement("button");
+            btn.type = "button";
+            btn.className = "modal__button";
+            btn.textContent = "Run on this image";
+
+            const result = document.createElement("div");
+            result.className = "modal__result";
+
+            btn.addEventListener("click", () => runSingle(normalizedPath || item.image_path, btn, result));
+
+            action.appendChild(btn);
+            action.appendChild(result);
+
+            li.appendChild(details);
+            li.appendChild(action);
+            frag.appendChild(li);
+          }
+          list.appendChild(frag);
+        }
+
+        function escapeHtml(value) {
+          return String(value)
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/\\"/g, "&quot;")
+            .replace(/'/g, "&#39;");
+        }
+
+function normalizeImagePath(path) {
+          if (!path) return "";
+          let p = String(path).replace(/\\\\/g, "/");
+          p = p.replace(/^\/+/, "");
+          const prefix = `datasets/${dataset}/`;
+          if (p.startsWith(prefix)) {
+            p = p.slice(prefix.length);
+          }
+          if (p.startsWith("images/QR_CODE/")) {
+            p = p.slice("images/QR_CODE/".length);
+          }
+          return p;
+        }
+
+        async function runSingle(imagePath, button, resultEl) {
+          if (!imagePath) {
+            resultEl.textContent = "Missing image path.";
+            return;
+          }
+          button.disabled = true;
+          resultEl.textContent = "Running...";
+          try {
+            const resp = await fetch(`/api/jobs/${jobId}/run_single`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ image_path: imagePath }),
+            });
+            const data = await resp.json();
+            if (!resp.ok) {
+              resultEl.textContent = data && data.error ? data.error : "Failed.";
+              return;
+            }
+            const time = data.time_total_min_sec != null ? data.time_total_min_sec.toFixed(6) : "n/a";
+            const acc = data.accuracy != null ? data.accuracy.toFixed(3) : "n/a";
+                        const decoded = data.decoded || data.decoded_best || "";
+            const expected = data.expected || "";
+            resultEl.innerHTML = [
+              `<span class=\"modal__label\">time</span> = ${time}s`,
+              `<span class=\"modal__label\">accuracy</span> = ${acc}`,
+              `<span class=\"modal__label\">decoded</span> = \"${escapeHtml(decoded)}\"`,
+              `<span class=\"modal__label\">expected</span> (if provided) = \"${escapeHtml(expected)}\"`,
+            ].join("<br>");
+          } catch (err) {
+            resultEl.textContent = "Request failed.";
+          } finally {
+            button.disabled = false;
+          }
+        }
+
+        async function fetchSamples(binValue, outcome) {
+          title.textContent = `Samples: bin ${binValue} / ${outcome}`;
+          status.textContent = "Loading...";
+          list.innerHTML = "";
+          openModal();
+          try {
+            const resp = await fetch(`/api/jobs/${jobId}/samples?bin=${encodeURIComponent(binValue)}&outcome=${encodeURIComponent(outcome)}`);
+            const raw = await resp.text();
+            let data = null;
+            try {
+              data = JSON.parse(raw);
+            } catch (err) {
+              data = null;
+            }
+            if (!resp.ok) {
+              status.textContent = data && data.error ? data.error : ("Failed to load samples (" + resp.status + ").");
+              return;
+            }
+            if (!Array.isArray(data)) {
+              status.textContent = "Unexpected response format.";
+              return;
+            }
+            renderList(data);
+          } catch (err) {
+            status.textContent = "Request failed.";
+          }
+        }
+
+        function attachPlotlyHandler() {
+          const plot = document.querySelector(".plotly-graph-div");
+          if (!plot || !plot.on) {
+            return;
+          }
+          plot.on("plotly_click", (event) => {
+            if (!event || !event.points || !event.points.length) {
+              return;
+            }
+            const point = event.points[0];
+            const traceName = (point.data && point.data.name ? point.data.name : "").toLowerCase();
+            if (traceName.includes("failed") || traceName.includes("correct")) {
+              const outcome = traceName.includes("failed") ? "failed" : "correct";
+              const binValue = parseInt(point.x, 10);
+              if (!Number.isFinite(binValue)) {
+                return;
+              }
+              fetchSamples(binValue, outcome);
+              return;
+            }
+            if (traceName.includes("time total min")) {
+              const imagePath = normalizeImagePath(point.customdata);
+              if (!imagePath) {
+                return;
+              }
+              title.textContent = `Sample: ${imagePath}`;
+              renderList([{ image_path: imagePath, time_total_min_sec: point.y }]);
+              openModal();
+            }
+          });
+        }
+
+        attachPlotlyHandler();
+      })();
+    </script>"""
     injection = template.replace("__JOB_ID__", job_id).replace("__DATASET__", dataset)
     return html.replace("</body>", injection + "</body>")
 

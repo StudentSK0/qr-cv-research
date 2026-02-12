@@ -77,22 +77,19 @@ def build_interactive_plot(
     pareto_stats = aggregate_module_sizes(results_sorted, n_min=10)
     pareto_front_points = pareto_front(
         pareto_stats,
-        minimize_keys=("time_median",),
+        minimize_keys=("time_min",),
         maximize_keys=("accuracy_mean",),
     )
-    pareto_bins = {int(round(p["module_size"])) for p in pareto_front_points}
-    pareto_mask = [
-        _quantize_raw_to_bin(r.module_size_raw, bin_step_px) in pareto_bins for r in results_sorted
-    ]
-    x_time_pareto = [x for x, keep in zip(x_time_raw, pareto_mask) if keep]
-    y_time_pareto = [y for y, keep in zip(y_time_raw, pareto_mask) if keep]
+    x_pareto_bins = [p["module_size"] for p in pareto_front_points]
+    y_pareto_bins = [p["time_min"] for p in pareto_front_points]
+    pareto_acc = [p["accuracy_mean"] for p in pareto_front_points]
 
     fig = make_subplots(
         rows=4,
         cols=1,
         shared_xaxes=True,
         vertical_spacing=0.06,
-        row_heights=[0.5, 0.22, 0.18, 0.1],
+        row_heights=[0.4, 0.18, 0.27, 0.15],
         specs=[[{}], [{}], [{"type": "table"}], [{"type": "table"}]],
     )
 
@@ -103,6 +100,7 @@ def build_interactive_plot(
             mode="markers",
             name="Time total min",
             marker=dict(size=6, color="#1f77b4", opacity=0.6),
+            customdata=[r.image_path for r in results_sorted],
             hovertemplate="module_size_raw=%{x:.3f}<br>time=%{y:.6f}s<extra></extra>",
         ),
         row=1,
@@ -123,15 +121,16 @@ def build_interactive_plot(
         col=1,
     )
 
-    if x_time_pareto:
+    if x_pareto_bins:
         fig.add_trace(
             go.Scatter(
-                x=x_time_pareto,
-                y=y_time_pareto,
+                x=x_pareto_bins,
+                y=y_pareto_bins,
                 mode="markers",
-                name="Pareto candidates",
-                marker=dict(size=9, color="#ff7f0e", symbol="diamond", line=dict(width=1)),
-                hovertemplate="module_size_raw=%{x:.3f}<br>time=%{y:.6f}s<extra></extra>",
+                name="Pareto bins",
+                marker=dict(size=10, color="#ff7f0e", symbol="diamond", line=dict(width=1)),
+                customdata=pareto_acc,
+                hovertemplate="module_size_bin=%{x:.0f}<br>time_min=%{y:.6f}s<br>accuracy_mean=%{customdata:.3f}<extra></extra>",
             ),
             row=1,
             col=1,
@@ -173,6 +172,8 @@ def build_interactive_plot(
                 ],
                 fill_color="#f0f0f0",
                 align="left",
+                font=dict(size=13),
+                height=28,
             ),
             cells=dict(
                 values=[
@@ -183,6 +184,8 @@ def build_interactive_plot(
                     y_count_acc0,
                 ],
                 align="left",
+                font=dict(size=13),
+                height=28,
             ),
         ),
         row=3,
@@ -193,7 +196,7 @@ def build_interactive_plot(
         pareto_values = [
             [f"{p['module_size']:.0f}" for p in pareto_front_points],
             [f"{p['n']:.0f}" for p in pareto_front_points],
-            [f"{p['time_median']:.6f}" for p in pareto_front_points],
+            [f"{p['time_min']:.6f}" for p in pareto_front_points],
             [f"{p['accuracy_mean']:.3f}" for p in pareto_front_points],
         ]
     else:
@@ -205,15 +208,19 @@ def build_interactive_plot(
                 values=[
                     "Pareto module size",
                     "Images (count)",
-                    "Time median (sec)",
+                    "Time min (sec)",
                     "Accuracy mean",
                 ],
                 fill_color="#f0f0f0",
                 align="left",
+                font=dict(size=13),
+                height=28,
             ),
             cells=dict(
                 values=pareto_values,
                 align="left",
+                font=dict(size=13),
+                height=28,
             ),
         ),
         row=4,
@@ -230,7 +237,7 @@ def build_interactive_plot(
         title=title or "QR decoding vs module size",
         barmode="stack",
         hovermode="closest",
-        height=980,
+        height=1250,
         legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="left", x=0),
         annotations=[
             dict(
