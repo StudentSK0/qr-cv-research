@@ -560,7 +560,9 @@ INDEX_TEMPLATE = """<!doctype html>
             </div>
 
             <div id="x_targets_field" class="field field--wide sweep-field {% if run_mode == 'sweep' %}open{% endif %}">
-              <label for="x_targets">x_targets (px)</label>
+              <label for="x_targets">module sizes (px)
+                <span class="tip" tabindex="0" data-tip="Module sizes are target QR module sizes in pixels. The whole dataset is normalized to the first module size, then to each next size, and one combined summary plot is built.">?</span>
+              </label>
               <input id="x_targets" name="x_targets" type="text" placeholder="2,3,4,6,8,10" value="{{ x_targets_value or '' }}" {% if run_mode != 'sweep' %}disabled{% endif %}>
               <p class="hint">Comma-separated integer target module sizes (1..200).</p>
             </div>
@@ -575,7 +577,7 @@ INDEX_TEMPLATE = """<!doctype html>
             </div>
             <div class="field">
               <label for="iterations">Iterations
-                <span class="tip" tabindex="0" data-tip="Number of decode repeats per image. time_total uses the minimum across repeats.">?</span>
+                <span class="tip" tabindex="0" data-tip="The number of decodings per image. Time is measured for each decoding, and the minimum time is taken. This allows to minimize the influence of third-party processes on the result of the experiment.">?</span>
               </label>
               <input id="iterations" name="iterations" type="number" min="1" value="{{ iterations_value }}" required>
             </div>
@@ -1065,7 +1067,9 @@ PROGRESS_TEMPLATE = """<!doctype html>
           <span class="meta__item">Engine: <strong>{{ engine }}</strong></span>
           <span class="meta__item">Mode: <strong>{{ mode_label }}</strong></span>
           {% if x_targets_text %}
-          <span class="meta__item">x_targets: <strong>{{ x_targets_text }}</strong></span>
+          <span class="meta__item">module sizes: <strong>{{ x_targets_text }}</strong>
+            <span class="tip" tabindex="0" data-tip="Module sizes are target QR module sizes in pixels. The whole dataset is normalized to the first module size, then to each next size, and one combined summary plot is built.">?</span>
+          </span>
           {% endif %}
         </div>
         <div class="progress">
@@ -1266,6 +1270,15 @@ RESULT_TEMPLATE = """<!doctype html>
       .links a:last-child {
         background: var(--accent);
       }
+      .explain {
+        margin-top: 12px;
+        padding: 10px 12px;
+        border-radius: 12px;
+        border: 1px solid rgba(30, 40, 60, 0.12);
+        background: #f8fbff;
+        color: #334155;
+        font-size: 0.88rem;
+      }
       iframe {
         width: 100%;
         height: 820px;
@@ -1454,7 +1467,9 @@ RESULT_TEMPLATE = """<!doctype html>
           <span class="meta__item">Iterations: <strong>{{ iterations }}</strong></span>
           <span class="meta__item">Time mode: <strong>{{ time_mode }}</strong></span>
           {% if job_type == 'sweep' and x_targets_text %}
-          <span class="meta__item">x_targets: <strong>{{ x_targets_text }}</strong></span>
+          <span class="meta__item">module sizes: <strong>{{ x_targets_text }}</strong>
+            <span class="tip" tabindex="0" data-tip="Module sizes are target QR module sizes in pixels. The whole dataset is normalized to the first module size, then to each next size, and one combined summary plot is built.">?</span>
+          </span>
           {% endif %}
         </div>
         <div class="summary">
@@ -1463,7 +1478,7 @@ RESULT_TEMPLATE = """<!doctype html>
             <span class="tip" tabindex="0" data-tip="Images skipped because markup JSON is missing or unreadable.">?</span>
           </div>
           <div>GT samples: {{ gt_samples }}
-            <span class="tip" tabindex="0" data-tip="Images that have a non-empty expected value in markup and can be compared against decoded output.">?</span>
+            <span class="tip" tabindex="0" data-tip="Images that have a non-empty expected value (Ground Truth) in markup and can be compared against decoded output.">?</span>
           </div>
           <div>NO GT samples: {{ no_gt_samples }}</div>
         </div>
@@ -1472,6 +1487,9 @@ RESULT_TEMPLATE = """<!doctype html>
           <a href="{{ html_url }}" target="_blank" rel="noopener">Download HTML</a>
           <a href="{{ json_url }}" target="_blank" rel="noopener">Download JSON</a>
         </div>
+        {% if job_type == 'sweep' %}
+        <div class="explain">P10-P90 band is the percentile range from the 10th to the 90th percentile of decode time; it shows the typical spread without extreme outliers.</div>
+        {% endif %}
       </div>
       <div class="card">
         <iframe src="{{ plot_url_embed }}"></iframe>
@@ -2095,7 +2113,7 @@ def _run_sweep_job(
     _update_job(
         job_id,
         status="running",
-        progress_note="Starting normalization sweep...",
+        progress_note="Starting dataset with a single module size run...",
         heartbeat_ts=time.time(),
     )
 
@@ -2187,7 +2205,7 @@ def _run_sweep_job(
         iterations=iterations,
         time_mode=time_mode,
         x_targets=x_targets,
-        title=f"QR normalization sweep ({dataset}, {engine.name})",
+        title=f"QR dataset with a single module size ({dataset}, {engine.name})",
     )
 
     summary_processed = sum(row.processed for row in sweep_summary.targets)
@@ -2209,7 +2227,7 @@ def _run_sweep_job(
                 for row in sweep_summary.targets
             ],
         },
-        progress_note="Normalization sweep completed.",
+        progress_note="Dataset with a single module size run completed.",
         target_index=target_count,
         target_total=target_count,
         heartbeat_ts=time.time(),
@@ -2445,7 +2463,7 @@ def create_app(project_root: Path | None = None) -> Flask:
         if job is None:
             abort(404)
 
-        mode_label = "Normalization sweep" if job.get("job_type") == "sweep" else "Baseline"
+        mode_label = "dataset with a single module size" if job.get("job_type") == "sweep" else "Baseline"
         x_targets_text = ", ".join(str(x) for x in job.get("x_targets", []))
 
         return render_template_string(
@@ -2495,7 +2513,7 @@ def create_app(project_root: Path | None = None) -> Flask:
         html_url = url_for("serve_output", engine=job["engine"], filename=job["html_file"])
 
         job_type = job.get("job_type", "baseline")
-        mode_label = "Normalization sweep" if job_type == "sweep" else "Baseline"
+        mode_label = "dataset with a single module size" if job_type == "sweep" else "Baseline"
         x_targets_text = ", ".join(str(x) for x in job.get("x_targets", []))
 
         payload = _load_job_json_payload(root, job)
@@ -2506,7 +2524,7 @@ def create_app(project_root: Path | None = None) -> Flask:
         skipped_no_markup = int(summary.get("skipped_no_markup", job.get("skipped_no_markup", 0) or 0))
 
         if job_type == "sweep":
-            panel_title = f"QR normalization sweep ({job['dataset']}, {job['engine']})"
+            panel_title = f"QR dataset with a single module size ({job['dataset']}, {job['engine']})"
         else:
             panel_title = f"QR baseline run ({job['dataset']}, {job['engine']})"
 
