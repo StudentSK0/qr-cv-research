@@ -353,6 +353,20 @@ def build_sweep_report(
         font-size: 15px;
         font-weight: 600;
       }
+      .summary-help {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 16px;
+        height: 16px;
+        margin-left: 4px;
+        border-radius: 50%;
+        background: #e2e8f0;
+        color: #475569;
+        font-size: 11px;
+        font-weight: 700;
+        cursor: help;
+      }
       table {
         width: 100%;
         border-collapse: collapse;
@@ -511,6 +525,15 @@ def build_sweep_report(
         font-size: 12px;
         color: var(--muted);
       }
+      .explain {
+        margin-top: 10px;
+        padding: 10px 12px;
+        border-radius: 12px;
+        border: 1px solid rgba(30, 40, 60, 0.12);
+        background: #f8fbff;
+        color: #334155;
+        font-size: 13px;
+      }
     </style>
   </head>
   <body>
@@ -528,11 +551,12 @@ def build_sweep_report(
                 f'<div class="summary-item"><div class="summary-item__label">Engine</div><div class="summary-item__value">{escape(engine)}</div></div>',
                 f'<div class="summary-item"><div class="summary-item__label">Iterations</div><div class="summary-item__value">{int(iterations)}</div></div>',
                 f'<div class="summary-item"><div class="summary-item__label">Time mode</div><div class="summary-item__value">{escape(time_mode)}</div></div>',
-                f'<div class="summary-item"><div class="summary-item__label">x_targets</div><div class="summary-item__value">{escape(x_targets_text)}</div></div>',
+                f'<div class="summary-item"><div class="summary-item__label">module sizes <span class="summary-help" title="Module sizes are target QR module sizes in pixels. The whole dataset is normalized to the first module size, then to each next size, and one combined summary plot is built.">?</span></div><div class="summary-item__value">{escape(x_targets_text)}</div></div>',
                 f'<div class="summary-item"><div class="summary-item__label">Total samples</div><div class="summary-item__value">{total_samples}</div></div>',
                 f'<div class="summary-item"><div class="summary-item__label">GT samples</div><div class="summary-item__value">{gt_samples}</div></div>',
                 f'<div class="summary-item"><div class="summary-item__label">NO GT samples</div><div class="summary-item__value">{no_gt_samples}</div></div>',
                 "</div>",
+                '<div class="explain">P10-P90 band is the percentile range from the 10th to the 90th percentile of decode time; it shows the typical spread without extreme outliers.</div>',
                 "</section>",
             ]
         )
