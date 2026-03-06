@@ -7,7 +7,13 @@ from InquirerPy import inquirer
 from .binning import build_bin_stats
 from .dataset_io import list_datasets
 from .engines import ENGINE_REGISTRY
-from .metrics import ExperimentConfig, run_experiment, save_results_json
+from .metrics import (
+    ExperimentConfig,
+    run_experiment,
+    run_module_size_normalization_sweep,
+    save_normalization_sweep_json,
+    save_results_json,
+)
 from .plot.plot_interactive import build_interactive_plot
 
 
@@ -62,6 +68,18 @@ def _select_dataset(project_root: Path) -> str | None:
     return str(selected)
 
 
+def _select_mode() -> str:
+    selected = inquirer.select(
+        message="Select benchmark mode:",
+        choices=[
+            {"name": "Standard (original module size)", "value": "standard"},
+            {"name": "Normalization sweep (target module size)", "value": "normalize_sweep"},
+        ],
+        default="standard",
+    ).execute()
+    return str(selected)
+
+
 def _prompt_int(message: str, default: int) -> int:
     def _validate(value: str) -> bool | str:
         if value.isdigit() and int(value) > 0:
@@ -74,6 +92,37 @@ def _prompt_int(message: str, default: int) -> int:
         validate=_validate,
     ).execute()
     return int(selected)
+
+
+def _prompt_targets(default: str = "2,3,4,6,8,10") -> list[float]:
+    def _validate(value: str) -> bool | str:
+        parsed = _parse_targets(value)
+        if parsed:
+            return True
+        return "Enter comma-separated positive numbers, e.g. 2,3,4,6,8,10"
+
+    selected = inquirer.text(
+        message="Target module sizes (px), comma-separated:",
+        default=default,
+        validate=_validate,
+    ).execute()
+    return _parse_targets(str(selected))
+
+
+def _parse_targets(raw: str) -> list[float]:
+    out: list[float] = []
+    for token in raw.split(","):
+        token = token.strip()
+        if not token:
+            continue
+        try:
+            value = float(token)
+        except ValueError:
+            continue
+        if value > 0:
+            out.append(value)
+
+    return sorted(set(out))
 
 
 def _relative(path: Path, root: Path) -> str:
@@ -94,6 +143,8 @@ def main() -> None:
     if not dataset_name:
         return
 
+    mode = _select_mode()
+
     iterations = _prompt_int("Decode iterations (default 3):", default=3)
     bin_step_px = _prompt_int("Module size bin step in px (default 2):", default=2)
 
@@ -109,6 +160,47 @@ def main() -> None:
         module_bin_step_px=bin_step_px,
         time_mode="time_total_min",
     )
+
+    if mode == "normalize_sweep":
+        targets = _prompt_targets()
+        if not targets:
+            print("No valid x_target values were provided.")
+            return
+
+        try:
+            sweep_results, sweep_summary = run_module_size_normalization_sweep(
+                project_root,
+                engine,
+                cfg,
+                x_targets=targets,
+            )
+        except Exception as exc:
+            print(f"Normalization sweep failed: {exc}")
+            return
+
+        if not sweep_results:
+            print("No sweep results to save.")
+            return
+
+        out_json = save_normalization_sweep_json(
+            project_root,
+            engine.name,
+            dataset_name,
+            x_targets=targets,
+            results=sweep_results,
+            summary=sweep_summary,
+        )
+
+        print("Summary (normalization sweep)")
+        for row in sweep_summary.targets:
+            print(
+                f"x_target={row.x_target:g}px: processed={row.processed}, "
+                f"skipped_no_markup={row.skipped_no_markup}, "
+                f"skipped_bad_module={row.skipped_bad_module}, "
+                f"skipped_image_read={row.skipped_image_read}"
+            )
+        print(f"saved_json_path: {_relative(out_json, project_root)}")
+        return
 
     results, summary = run_experiment(project_root, engine, cfg)
     if not results:
