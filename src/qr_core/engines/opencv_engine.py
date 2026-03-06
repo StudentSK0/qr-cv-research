@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+from typing import Any
 
 from .base import BaseEngine, ImageReadError
 
@@ -22,6 +23,12 @@ class OpenCVEngine(BaseEngine):
         image = cv2.imread(str(image_path))
         if image is None:
             raise ImageReadError(f"Failed to read image: {image_path}")
+
+        return self._decode_array(image)
+
+    def _decode_array(self, image: Any) -> str:
+        if image is None:
+            raise ImageReadError("Failed to decode from empty image.")
 
         try:
             retval, decoded_info, _, _ = self._detector.detectAndDecodeMulti(image)

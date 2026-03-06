@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+from typing import Any
 
 from .base import BaseEngine, ImageReadError
 
@@ -26,7 +27,19 @@ class ZBarEngine(BaseEngine):
         if image is None:
             raise ImageReadError(f"Failed to read image: {image_path}")
 
-        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+        return self._decode_array(image)
+
+    def _decode_array(self, image: Any) -> str:
+        cv2 = self._cv2
+
+        if image is None:
+            raise ImageReadError("Failed to decode from empty image.")
+
+        if len(getattr(image, "shape", ())) == 2:
+            gray = image
+        else:
+            gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+
         decoded = self._zbar_decode(gray, symbols=[self._ZBarSymbol.QRCODE])
         if not decoded:
             return ""

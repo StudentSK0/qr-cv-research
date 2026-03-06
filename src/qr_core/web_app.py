@@ -4,6 +4,7 @@ import json
 import re
 import shutil
 import threading
+import time
 import uuid
 from collections import Counter
 import zipfile
@@ -16,9 +17,17 @@ from .binning import build_bin_stats
 from .dataset_io import iter_qr_samples
 from .engines import ENGINE_REGISTRY
 from .engines.base import EngineError
-from .metrics import ExperimentConfig, ProgressState, run_experiment, save_results_json
+from .metrics import (
+    ExperimentConfig,
+    ProgressState,
+    run_experiment,
+    run_module_size_normalization_sweep,
+    save_normalization_sweep_json,
+    save_results_json,
+)
 from .markup import extract_expected_value, read_markup
 from .plot.plot_interactive import build_interactive_plot
+from .plot.plot_sweep_report import build_sweep_report
 
 
 INDEX_TEMPLATE = """<!doctype html>
@@ -126,6 +135,32 @@ INDEX_TEMPLATE = """<!doctype html>
       .field--wide {
         grid-column: 1 / -1;
       }
+      .mode-switch {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+      .mode-switch__option {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 12px;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        background: #f6f8fb;
+        font-size: 0.9rem;
+        color: var(--ink);
+        cursor: pointer;
+      }
+      .mode-switch__option input {
+        margin: 0;
+      }
+      .sweep-field {
+        display: none;
+      }
+      .sweep-field.open {
+        display: grid;
+      }
       .selected-dataset {
         padding: 12px 14px;
         border-radius: 14px;
@@ -149,7 +184,11 @@ INDEX_TEMPLATE = """<!doctype html>
         box-shadow: none;
         border: 1px solid var(--line);
       }
-      .secondary-button:hover
+      .secondary-button:hover,
+      .secondary-button:focus {
+        transform: translateY(-1px);
+        box-shadow: 0 12px 22px rgba(15, 139, 141, 0.18);
+      }
       #browse_zip_btn {
         box-shadow: none;
       }
@@ -158,11 +197,8 @@ INDEX_TEMPLATE = """<!doctype html>
         box-shadow: 0 16px 28px rgba(15, 139, 141, 0.32);
         transform: translateY(-1px);
       }
- {
-        transform: translateY(-1px);
-        box-shadow: 0 12px 22px rgba(15, 139, 141, 0.18);
-      }
       .existing-picker {
+
         display: none;
         margin-top: 12px;
         gap: 8px;
@@ -478,7 +514,7 @@ INDEX_TEMPLATE = """<!doctype html>
         </div>
       </header>
       <section class="card">
-        <form method="post" action="{{ url_for('run_experiment_route') }}" enctype="multipart/form-data">
+        <form id="run_form" method="post" action="{{ url_for('run_experiment_route') }}" enctype="multipart/form-data">
 
           <div class="form-grid">
             <div class="field field--wide">
@@ -508,11 +544,32 @@ INDEX_TEMPLATE = """<!doctype html>
                 </select>
               </div>
             </div>
-<div class="field">
+
+            <div class="field field--wide">
+              <label>Benchmark mode</label>
+              <div class="mode-switch" role="radiogroup" aria-label="Benchmark mode">
+                <label class="mode-switch__option">
+                  <input type="radio" name="run_mode" value="baseline" {% if run_mode != 'sweep' %}checked{% endif %}>
+                  <span>Baseline</span>
+                </label>
+                <label class="mode-switch__option">
+                  <input type="radio" name="run_mode" value="sweep" {% if run_mode == 'sweep' %}checked{% endif %}>
+                  <span>Normalization sweep (target module size)</span>
+                </label>
+              </div>
+            </div>
+
+            <div id="x_targets_field" class="field field--wide sweep-field {% if run_mode == 'sweep' %}open{% endif %}">
+              <label for="x_targets">x_targets (px)</label>
+              <input id="x_targets" name="x_targets" type="text" placeholder="2,3,4,6,8,10" value="{{ x_targets_value or '' }}" {% if run_mode != 'sweep' %}disabled{% endif %}>
+              <p class="hint">Comma-separated integer target module sizes (1..200).</p>
+            </div>
+
+            <div class="field">
               <label for="engine">Engine</label>
               <select id="engine" name="engine" required>
                 {% for engine in engines %}
-                <option value="{{ engine }}">{{ engine }}</option>
+                <option value="{{ engine }}" {% if selected_engine == engine %}selected{% endif %}>{{ engine }}</option>
                 {% endfor %}
               </select>
             </div>
@@ -520,13 +577,13 @@ INDEX_TEMPLATE = """<!doctype html>
               <label for="iterations">Iterations
                 <span class="tip" tabindex="0" data-tip="Number of decode repeats per image. time_total uses the minimum across repeats.">?</span>
               </label>
-              <input id="iterations" name="iterations" type="number" min="1" value="3" required>
+              <input id="iterations" name="iterations" type="number" min="1" value="{{ iterations_value }}" required>
             </div>
             <div class="field">
               <label for="bin_step_px">Module size bin step (px)
                 <span class="tip" tabindex="0" data-tip="Bin width for module_size in pixels. Samples are grouped by this step.">?</span>
               </label>
-              <input id="bin_step_px" name="bin_step_px" type="number" min="1" value="2" required>
+              <input id="bin_step_px" name="bin_step_px" type="number" min="1" value="{{ bin_step_value }}" required>
             </div>
           </div>
           <div class="actions">
@@ -541,6 +598,7 @@ INDEX_TEMPLATE = """<!doctype html>
     </div>
     <script>
       (function () {
+        const runForm = document.getElementById("run_form");
         const selectedDisplay = document.getElementById("selected_dataset_display");
         const datasetSourceInput = document.getElementById("dataset_source");
         const datasetNameInput = document.getElementById("dataset_name");
@@ -551,6 +609,9 @@ INDEX_TEMPLATE = """<!doctype html>
         const datasetSelect = document.getElementById("dataset_select");
         const lastDataset = "{{ last_dataset or '' }}";
 
+        const modeInputs = document.querySelectorAll('input[name="run_mode"]');
+        const xTargetsField = document.getElementById("x_targets_field");
+        const xTargetsInput = document.getElementById("x_targets");
 
         function setSelectedText(text) {
           selectedDisplay.textContent = text || "No dataset selected";
@@ -583,6 +644,51 @@ INDEX_TEMPLATE = """<!doctype html>
           setSelectedText(fileName || "ZIP selected");
         }
 
+        function activeRunMode() {
+          for (const input of modeInputs) {
+            if (input.checked) {
+              return input.value;
+            }
+          }
+          return "baseline";
+        }
+
+        function syncRunModeUi() {
+          const isSweep = activeRunMode() === "sweep";
+          if (xTargetsField) {
+            xTargetsField.classList.toggle("open", isSweep);
+          }
+          if (xTargetsInput) {
+            xTargetsInput.disabled = !isSweep;
+            if (!isSweep) {
+              xTargetsInput.setCustomValidity("");
+            }
+          }
+        }
+
+        function parseTargets(raw) {
+          const tokens = String(raw || "").split(",").map((t) => t.trim()).filter(Boolean);
+          if (!tokens.length) {
+            return { ok: false, error: "Enter at least one x_target value." };
+          }
+          const values = [];
+          for (const token of tokens) {
+            if (!/^\\d+$/.test(token)) {
+              return { ok: false, error: "x_targets must contain integers only." };
+            }
+            const value = Number(token);
+            if (!Number.isInteger(value) || value < 1 || value > 200) {
+              return { ok: false, error: "x_targets values must be in range 1..200." };
+            }
+            values.push(value);
+          }
+          if (!values.length) {
+            return { ok: false, error: "Enter at least one x_target value." };
+          }
+          const dedup = Array.from(new Set(values)).sort((a, b) => a - b);
+          return { ok: true, values: dedup };
+        }
+
         if (browseBtn) {
           browseBtn.addEventListener("click", () => {
             fileInput.click();
@@ -611,6 +717,29 @@ INDEX_TEMPLATE = """<!doctype html>
               existingPicker.classList.remove("open");
               existingPicker.setAttribute("aria-hidden", "true");
             }
+          });
+        }
+
+        if (modeInputs.length) {
+          modeInputs.forEach((input) => {
+            input.addEventListener("change", syncRunModeUi);
+          });
+        }
+
+        if (runForm) {
+          runForm.addEventListener("submit", (event) => {
+            if (activeRunMode() !== "sweep" || !xTargetsInput) {
+              return;
+            }
+            const parsed = parseTargets(xTargetsInput.value);
+            if (!parsed.ok) {
+              event.preventDefault();
+              xTargetsInput.setCustomValidity(parsed.error);
+              xTargetsInput.reportValidity();
+              return;
+            }
+            xTargetsInput.setCustomValidity("");
+            xTargetsInput.value = parsed.values.join(",");
           });
         }
 
@@ -648,6 +777,9 @@ INDEX_TEMPLATE = """<!doctype html>
             closeStructure();
           }
         });
+
+        syncRunModeUi();
+
         if (lastDataset) {
           setSelectedText(lastDataset);
           datasetNameInput.value = lastDataset;
@@ -656,10 +788,6 @@ INDEX_TEMPLATE = """<!doctype html>
         }
       })();
     </script>
-
-
-  
-    </div>
 
     <div id="datasetStructureModal" class="info-modal" role="dialog" aria-modal="true" aria-labelledby="datasetStructureTitle" aria-hidden="true">
       <div class="info-modal__content">
@@ -801,6 +929,11 @@ PROGRESS_TEMPLATE = """<!doctype html>
         color: var(--muted);
         font-size: 0.9rem;
       }
+      .progress-note {
+        margin-top: 10px;
+        color: var(--muted);
+        font-size: 0.9rem;
+      }
       .tip {
         display: inline-flex;
         align-items: center;
@@ -930,6 +1063,10 @@ PROGRESS_TEMPLATE = """<!doctype html>
         <div class="meta">
           <span class="meta__item">Dataset: <strong>{{ dataset }}</strong></span>
           <span class="meta__item">Engine: <strong>{{ engine }}</strong></span>
+          <span class="meta__item">Mode: <strong>{{ mode_label }}</strong></span>
+          {% if x_targets_text %}
+          <span class="meta__item">x_targets: <strong>{{ x_targets_text }}</strong></span>
+          {% endif %}
         </div>
         <div class="progress">
           <div class="progress__fill" id="progress-fill"></div>
@@ -938,11 +1075,13 @@ PROGRESS_TEMPLATE = """<!doctype html>
           <span id="progress-text">0%</span>
           <span id="progress-count">0 / {{ total }}</span>
         </div>
+        <div id="progress-note" class="progress-note"></div>
         <div class="summary">
           <div>processed: <span id="processed">0</span></div>
           <div>skipped_no_markup: <span id="skipped_no_markup">0</span>
             <span class="tip" tabindex="0" data-tip="Images skipped because markup JSON is missing or unreadable.">?</span>
           </div>
+          <div id="target_progress_box" style="display:none;">target: <span id="target_progress">0 / 0</span></div>
         </div>
         <div class="error" id="error-box" style="display:none;"></div>
       </div>
@@ -955,6 +1094,9 @@ PROGRESS_TEMPLATE = """<!doctype html>
       const progressCount = document.getElementById("progress-count");
       const processedEl = document.getElementById("processed");
       const skippedNoMarkupEl = document.getElementById("skipped_no_markup");
+      const targetProgressBox = document.getElementById("target_progress_box");
+      const targetProgress = document.getElementById("target_progress");
+      const progressNote = document.getElementById("progress-note");
       const errorBox = document.getElementById("error-box");
 
       async function poll() {
@@ -971,6 +1113,17 @@ PROGRESS_TEMPLATE = """<!doctype html>
           progressCount.textContent = `${seen} / ${total}`;
           processedEl.textContent = data.processed || 0;
           skippedNoMarkupEl.textContent = data.skipped_no_markup || 0;
+
+          if (data.target_total && data.target_total > 0) {
+            targetProgressBox.style.display = "block";
+            targetProgress.textContent = `${data.target_index || 0} / ${data.target_total}`;
+          } else {
+            targetProgressBox.style.display = "none";
+          }
+
+          if (progressNote) {
+            progressNote.textContent = data.progress_note || "";
+          }
 
           if (data.status === "done") {
             window.location.href = `/results/${jobId}`;
@@ -1291,24 +1444,32 @@ RESULT_TEMPLATE = """<!doctype html>
   </head>
   <body>
     <div class="page">
+      <a class="back-link" href="{{ url_for('index', dataset=dataset) }}">Back to setup</a>
       <div class="card">
-        <a class="back-link" href="{{ url_for('index', dataset=dataset) }}">Back to setup</a>
-        <h1>Experiment results</h1>
+        <h1>{{ panel_title }}</h1>
         <div class="meta">
           <span class="meta__item">Dataset: <strong>{{ dataset }}</strong></span>
           <span class="meta__item">Engine: <strong>{{ engine }}</strong></span>
+          <span class="meta__item">Mode: <strong>{{ mode_label }}</strong></span>
           <span class="meta__item">Iterations: <strong>{{ iterations }}</strong></span>
-          <span class="meta__item">Bin step: <strong>{{ bin_step_px }} px</strong></span>
-          <span class="meta__item">Mode: <strong>time_total min</strong></span>
+          <span class="meta__item">Time mode: <strong>{{ time_mode }}</strong></span>
+          {% if job_type == 'sweep' and x_targets_text %}
+          <span class="meta__item">x_targets: <strong>{{ x_targets_text }}</strong></span>
+          {% endif %}
         </div>
         <div class="summary">
-          <div>processed: {{ summary.processed }}</div>
-          <div>skipped_no_markup: {{ summary.skipped_no_markup }}
+          <div>processed: {{ processed }}</div>
+          <div>skipped_no_markup: {{ skipped_no_markup }}
             <span class="tip" tabindex="0" data-tip="Images skipped because markup JSON is missing or unreadable.">?</span>
           </div>
+          <div>GT samples: {{ gt_samples }}
+            <span class="tip" tabindex="0" data-tip="Images that have a non-empty expected value in markup and can be compared against decoded output.">?</span>
+          </div>
+          <div>NO GT samples: {{ no_gt_samples }}</div>
         </div>
         <div class="links">
           <a href="{{ plot_url }}" target="_blank" rel="noopener">Open plot</a>
+          <a href="{{ html_url }}" target="_blank" rel="noopener">Download HTML</a>
           <a href="{{ json_url }}" target="_blank" rel="noopener">Download JSON</a>
         </div>
       </div>
@@ -1317,6 +1478,7 @@ RESULT_TEMPLATE = """<!doctype html>
       </div>
     </div>
   
+    {% if job_type == 'baseline' %}
     <div id="drilldownModal" class="modal">
       <div class="modal__content" role="dialog" aria-modal="true" aria-labelledby="drilldownTitle">
         <div class="modal__header">
@@ -1426,7 +1588,7 @@ RESULT_TEMPLATE = """<!doctype html>
         function normalizeImagePath(path) {
           if (!path) return "";
           let p = String(path).replace(/\\\\/g, "/");
-          p = p.replace(/^\/+/, "");
+          p = p.replace(/^\\/+/, "");
           const prefix = `datasets/${dataset}/`;
           if (p.startsWith(prefix)) {
             p = p.slice(prefix.length);
@@ -1595,6 +1757,7 @@ RESULT_TEMPLATE = """<!doctype html>
 
       })();
     </script>
+    {% endif %}
 
   </body>
 </html>
@@ -1636,6 +1799,34 @@ def _parse_positive_int(value: str | None, default: int) -> int:
     except ValueError:
         return default
     return parsed if parsed > 0 else default
+
+
+def _parse_run_mode(value: str | None) -> str:
+    if (value or "").strip().lower() == "sweep":
+        return "sweep"
+    return "baseline"
+
+
+def _parse_x_targets(value: str | None) -> tuple[list[int] | None, str | None]:
+    if value is None or not value.strip():
+        return None, "x_targets is required for sweep mode."
+
+    targets: list[int] = []
+    for raw_token in value.split(","):
+        token = raw_token.strip()
+        if not token:
+            continue
+        if not token.isdigit():
+            return None, f"Invalid x_target '{token}'. Use comma-separated integers."
+        parsed = int(token)
+        if parsed < 1 or parsed > 200:
+            return None, "x_targets values must be in range 1..200."
+        targets.append(parsed)
+
+    if not targets:
+        return None, "x_targets is required for sweep mode."
+
+    return sorted(set(targets)), None
 
 
 def _safe_engine_key(engine_key: str, registry: dict[str, Any]) -> bool:
@@ -1769,18 +1960,29 @@ def _init_job(
     iterations: int,
     bin_step_px: int,
     total: int,
+    *,
+    job_type: str = "baseline",
+    x_targets: list[int] | None = None,
+    time_mode: str = "time_total_min",
 ) -> None:
     with JOBS_LOCK:
         JOBS[job_id] = {
             "status": "queued",
+            "job_type": job_type,
             "dataset": dataset,
             "engine": engine_key,
             "iterations": iterations,
             "bin_step_px": bin_step_px,
+            "x_targets": list(x_targets or []),
+            "time_mode": time_mode,
             "total": total,
             "seen": 0,
             "processed": 0,
             "skipped_no_markup": 0,
+            "target_index": 0,
+            "target_total": len(x_targets or []),
+            "progress_note": None,
+            "heartbeat_ts": time.time(),
             "error": None,
             "json_file": None,
             "html_file": None,
@@ -1810,7 +2012,12 @@ def _run_job(
     iterations: int,
     bin_step_px: int,
 ) -> None:
-    _update_job(job_id, status="running")
+    _update_job(
+        job_id,
+        status="running",
+        progress_note="Running baseline experiment...",
+        heartbeat_ts=time.time(),
+    )
 
     try:
         engine = ENGINE_REGISTRY[engine_key]()
@@ -1831,6 +2038,7 @@ def _run_job(
             seen=state.seen,
             processed=state.processed,
             skipped_no_markup=state.skipped_no_markup,
+            heartbeat_ts=time.time(),
         )
 
     try:
@@ -1856,13 +2064,202 @@ def _run_job(
     _update_job(
         job_id,
         status="done",
+        seen=summary.processed + summary.skipped_no_markup + summary.skipped_bad_module + summary.skipped_image_read,
+        processed=summary.processed,
+        skipped_no_markup=summary.skipped_no_markup,
         json_file=out_json.name,
         html_file=out_html.name,
         summary={
             "processed": summary.processed,
             "skipped_no_markup": summary.skipped_no_markup,
         },
+        progress_note="Baseline experiment completed.",
+        heartbeat_ts=time.time(),
     )
+
+
+def _run_sweep_job(
+    job_id: str,
+    project_root: Path,
+    dataset: str,
+    engine_key: str,
+    iterations: int,
+    bin_step_px: int,
+    x_targets: list[int],
+    total_per_target: int,
+    time_mode: str,
+) -> None:
+    target_count = max(1, len(x_targets))
+    total_expected = max(0, total_per_target) * target_count
+
+    _update_job(
+        job_id,
+        status="running",
+        progress_note="Starting normalization sweep...",
+        heartbeat_ts=time.time(),
+    )
+
+    try:
+        engine = ENGINE_REGISTRY[engine_key]()
+    except Exception as exc:
+        _update_job(job_id, status="error", error=f"Failed to initialize engine: {exc}")
+        return
+
+    cfg = ExperimentConfig(
+        dataset_name=dataset,
+        decode_iterations=iterations,
+        module_bin_step_px=bin_step_px,
+        time_mode=time_mode,
+    )
+
+    current_target_idx = 0
+    last_seen = 0
+    last_processed = 0
+    last_skipped_no_markup = 0
+    processed_offset = 0
+    skipped_no_markup_offset = 0
+
+    def _progress_cb(state: ProgressState) -> None:
+        nonlocal current_target_idx
+        nonlocal last_seen
+        nonlocal last_processed
+        nonlocal last_skipped_no_markup
+        nonlocal processed_offset
+        nonlocal skipped_no_markup_offset
+
+        if state.seen < last_seen:
+            processed_offset += last_processed
+            skipped_no_markup_offset += last_skipped_no_markup
+            current_target_idx = min(current_target_idx + 1, max(0, target_count - 1))
+
+        last_seen = state.seen
+        last_processed = state.processed
+        last_skipped_no_markup = state.skipped_no_markup
+
+        combined_seen = current_target_idx * total_per_target + state.seen
+        combined_processed = processed_offset + state.processed
+        combined_skip_markup = skipped_no_markup_offset + state.skipped_no_markup
+
+        target_label = x_targets[current_target_idx] if x_targets else "?"
+        _update_job(
+            job_id,
+            seen=min(total_expected, combined_seen),
+            processed=combined_processed,
+            skipped_no_markup=combined_skip_markup,
+            target_index=current_target_idx + 1,
+            target_total=target_count,
+            progress_note=f"x_target {current_target_idx + 1}/{target_count} ({target_label} px)",
+            heartbeat_ts=time.time(),
+        )
+
+    try:
+        sweep_results, sweep_summary = run_module_size_normalization_sweep(
+            project_root,
+            engine,
+            cfg,
+            x_targets=x_targets,
+            progress_cb=_progress_cb,
+        )
+    except Exception as exc:
+        _update_job(job_id, status="error", error=f"Normalization sweep failed: {exc}")
+        return
+
+    if not sweep_results:
+        _update_job(job_id, status="error", error="No sweep results produced.")
+        return
+
+    out_json = save_normalization_sweep_json(
+        project_root,
+        engine.name,
+        dataset,
+        x_targets=x_targets,
+        results=sweep_results,
+        summary=sweep_summary,
+    )
+
+    out_html = out_json.with_name(f"qr_normalization_sweep_{dataset}_{engine.name}.html")
+    build_sweep_report(
+        sweep_results,
+        sweep_summary,
+        out_html,
+        dataset=dataset,
+        engine=engine.name,
+        iterations=iterations,
+        time_mode=time_mode,
+        x_targets=x_targets,
+        title=f"QR normalization sweep ({dataset}, {engine.name})",
+    )
+
+    summary_processed = sum(row.processed for row in sweep_summary.targets)
+    summary_skip_no_markup = sum(row.skipped_no_markup for row in sweep_summary.targets)
+
+    _update_job(
+        job_id,
+        status="done",
+        seen=total_expected,
+        processed=summary_processed,
+        skipped_no_markup=summary_skip_no_markup,
+        json_file=out_json.name,
+        html_file=out_html.name,
+        summary={
+            "processed": summary_processed,
+            "skipped_no_markup": summary_skip_no_markup,
+            "targets": [
+                {"x_target": float(row.x_target), "processed": row.processed, "skipped_no_markup": row.skipped_no_markup}
+                for row in sweep_summary.targets
+            ],
+        },
+        progress_note="Normalization sweep completed.",
+        target_index=target_count,
+        target_total=target_count,
+        heartbeat_ts=time.time(),
+    )
+
+
+def _resolve_job_json_path(project_root: Path, job: dict[str, Any]) -> Path | None:
+    json_name = job.get("json_file")
+    engine = job.get("engine")
+    if not json_name or not engine:
+        return None
+
+    outputs_dir = (project_root / "outputs" / f"{engine}_json_and_graphics").resolve()
+    json_path = (outputs_dir / str(json_name)).resolve()
+
+    if not json_path.is_file() or not json_path.is_relative_to(outputs_dir):
+        return None
+    return json_path
+
+
+def _load_job_json_payload(project_root: Path, job: dict[str, Any]) -> Any:
+    json_path = _resolve_job_json_path(project_root, job)
+    if json_path is None:
+        return None
+    try:
+        return json.loads(json_path.read_text(encoding="utf-8"))
+    except Exception:
+        return None
+
+
+def _iter_result_records(payload: Any) -> list[dict[str, Any]]:
+    if isinstance(payload, list):
+        return [item for item in payload if isinstance(item, dict)]
+    if isinstance(payload, dict):
+        records = payload.get("results")
+        if isinstance(records, list):
+            return [item for item in records if isinstance(item, dict)]
+    return []
+
+
+def _compute_gt_no_gt_counts(payload: Any) -> tuple[int, int]:
+    gt_samples = 0
+    no_gt_samples = 0
+    for rec in _iter_result_records(payload):
+        expected = str(rec.get("expected") or "")
+        if expected.strip():
+            gt_samples += 1
+        else:
+            no_gt_samples += 1
+    return gt_samples, no_gt_samples
 
 
 def create_app(project_root: Path | None = None) -> Flask:
@@ -1872,13 +2269,25 @@ def create_app(project_root: Path | None = None) -> Flask:
 
     @app.get("/")
     def index() -> str:
+        requested_dataset = _safe_dataset_name(request.args.get("dataset"))
+        return _render_index(last_dataset=requested_dataset)
+
+    def _render_index(
+        *,
+        error: str | None = None,
+        last_dataset: str | None = None,
+        run_mode: str = "baseline",
+        x_targets_value: str = "2,3,4,6,8,10",
+        selected_engine: str | None = None,
+        iterations_value: int = 3,
+        bin_step_value: int = 2,
+    ) -> str:
         engines = list(ENGINE_REGISTRY.keys())
-        error = None
+        local_error = error
         if not engines:
-            error = "No engines registered."
+            local_error = local_error or "No engines registered."
 
         available_datasets = _list_datasets(root)
-        last_dataset = _safe_dataset_name(request.args.get("dataset"))
         if last_dataset:
             dataset_dir = root / "datasets" / last_dataset
             if not _has_dataset_structure(dataset_dir):
@@ -1889,28 +2298,39 @@ def create_app(project_root: Path | None = None) -> Flask:
         dataset_counts = {name: _dataset_image_count(root, name) for name in available_datasets}
         dataset_counts_json = json.dumps(dataset_counts)
 
+        if not selected_engine and engines:
+            selected_engine = engines[0]
+
         return render_template_string(
             INDEX_TEMPLATE,
             engines=engines,
-            error=error,
+            error=local_error,
             last_dataset=last_dataset,
             available_datasets=available_datasets,
             dataset_counts_json=dataset_counts_json,
+            run_mode=run_mode,
+            x_targets_value=x_targets_value,
+            selected_engine=selected_engine,
+            iterations_value=max(1, int(iterations_value)),
+            bin_step_value=max(1, int(bin_step_value)),
         )
 
     @app.post("/run")
     def run_experiment_route() -> str:
-        engines = list(ENGINE_REGISTRY.keys())
-
         iterations = _parse_positive_int(request.form.get("iterations"), default=3)
         bin_step_px = _parse_positive_int(request.form.get("bin_step_px"), default=2)
         engine_key = request.form.get("engine", "")
+        run_mode = _parse_run_mode(request.form.get("run_mode"))
+        x_targets_raw = (request.form.get("x_targets") or "").strip()
 
         if not _safe_engine_key(engine_key, ENGINE_REGISTRY):
-            return render_template_string(
-                INDEX_TEMPLATE,
-                engines=engines,
+            return _render_index(
                 error="Unknown engine selected.",
+                run_mode=run_mode,
+                x_targets_value=x_targets_raw,
+                selected_engine=engine_key,
+                iterations_value=iterations,
+                bin_step_value=bin_step_px,
             )
 
         dataset_file = request.files.get("dataset_file")
@@ -1937,25 +2357,78 @@ def create_app(project_root: Path | None = None) -> Flask:
             error = "Invalid dataset source."
 
         if error:
-            return render_template_string(
-                INDEX_TEMPLATE,
-                engines=engines,
+            fallback_dataset = dataset or _safe_dataset_name(request.form.get("dataset_name"))
+            return _render_index(
                 error=error,
-                last_dataset=dataset,
-                available_datasets=_list_datasets(root),
-                dataset_counts_json=json.dumps({name: _dataset_image_count(root, name) for name in _list_datasets(root)}),
+                last_dataset=fallback_dataset,
+                run_mode=run_mode,
+                x_targets_value=x_targets_raw,
+                selected_engine=engine_key,
+                iterations_value=iterations,
+                bin_step_value=bin_step_px,
             )
+
+        if run_mode == "sweep":
+            x_targets, x_targets_error = _parse_x_targets(x_targets_raw)
+            if x_targets_error:
+                return _render_index(
+                    error=x_targets_error,
+                    last_dataset=dataset,
+                    run_mode=run_mode,
+                    x_targets_value=x_targets_raw,
+                    selected_engine=engine_key,
+                    iterations_value=iterations,
+                    bin_step_value=bin_step_px,
+                )
+        else:
+            x_targets = []
 
         total = sum(1 for _ in iter_qr_samples(root, dataset))
         if total == 0:
-            return render_template_string(
-                INDEX_TEMPLATE,
-                engines=engines,
+            return _render_index(
                 error="No images found in dataset.",
+                last_dataset=dataset,
+                run_mode=run_mode,
+                x_targets_value=x_targets_raw,
+                selected_engine=engine_key,
+                iterations_value=iterations,
+                bin_step_value=bin_step_px,
             )
 
         job_id = uuid.uuid4().hex
-        _init_job(job_id, dataset, engine_key, iterations, bin_step_px, total)
+        time_mode = "time_total_min"
+
+        if run_mode == "sweep":
+            assert x_targets
+            _init_job(
+                job_id,
+                dataset,
+                engine_key,
+                iterations,
+                bin_step_px,
+                total * len(x_targets),
+                job_type="sweep",
+                x_targets=x_targets,
+                time_mode=time_mode,
+            )
+            thread = threading.Thread(
+                target=_run_sweep_job,
+                args=(job_id, root, dataset, engine_key, iterations, bin_step_px, x_targets, total, time_mode),
+                daemon=True,
+            )
+            thread.start()
+            return redirect(url_for("job_status", job_id=job_id))
+
+        _init_job(
+            job_id,
+            dataset,
+            engine_key,
+            iterations,
+            bin_step_px,
+            total,
+            job_type="baseline",
+            time_mode=time_mode,
+        )
 
         thread = threading.Thread(
             target=_run_job,
@@ -1971,12 +2444,18 @@ def create_app(project_root: Path | None = None) -> Flask:
         job = _get_job(job_id)
         if job is None:
             abort(404)
+
+        mode_label = "Normalization sweep" if job.get("job_type") == "sweep" else "Baseline"
+        x_targets_text = ", ".join(str(x) for x in job.get("x_targets", []))
+
         return render_template_string(
             PROGRESS_TEMPLATE,
             job_id=job_id,
             dataset=job["dataset"],
             engine=job["engine"],
             total=job["total"],
+            mode_label=mode_label,
+            x_targets_text=x_targets_text,
         )
 
     @app.get("/progress/<job_id>")
@@ -1987,10 +2466,14 @@ def create_app(project_root: Path | None = None) -> Flask:
         return jsonify(
             {
                 "status": job["status"],
+                "job_type": job.get("job_type", "baseline"),
                 "seen": job["seen"],
                 "processed": job["processed"],
                 "skipped_no_markup": job["skipped_no_markup"],
                 "total": job["total"],
+                "target_index": job.get("target_index", 0),
+                "target_total": job.get("target_total", 0),
+                "progress_note": job.get("progress_note"),
                 "error": job.get("error"),
             }
         )
@@ -2009,18 +2492,43 @@ def create_app(project_root: Path | None = None) -> Flask:
         plot_url = url_for("serve_output", engine=job["engine"], filename=job["html_file"], job_id=job_id)
         plot_url_embed = f"{plot_url}&embed=1"
         json_url = url_for("serve_output", engine=job["engine"], filename=job["json_file"])
+        html_url = url_for("serve_output", engine=job["engine"], filename=job["html_file"])
+
+        job_type = job.get("job_type", "baseline")
+        mode_label = "Normalization sweep" if job_type == "sweep" else "Baseline"
+        x_targets_text = ", ".join(str(x) for x in job.get("x_targets", []))
+
+        payload = _load_job_json_payload(root, job)
+        gt_samples, no_gt_samples = _compute_gt_no_gt_counts(payload)
+
+        summary = job.get("summary") or {}
+        processed = int(summary.get("processed", job.get("processed", 0) or 0))
+        skipped_no_markup = int(summary.get("skipped_no_markup", job.get("skipped_no_markup", 0) or 0))
+
+        if job_type == "sweep":
+            panel_title = f"QR normalization sweep ({job['dataset']}, {job['engine']})"
+        else:
+            panel_title = f"QR baseline run ({job['dataset']}, {job['engine']})"
 
         return render_template_string(
             RESULT_TEMPLATE,
             job_id=job_id,
+            job_type=job_type,
+            panel_title=panel_title,
+            mode_label=mode_label,
             dataset=job["dataset"],
             engine=job["engine"],
             iterations=job["iterations"],
-            bin_step_px=job["bin_step_px"],
-            summary=job["summary"],
+            time_mode=job.get("time_mode", "time_total_min"),
+            x_targets_text=x_targets_text,
+            processed=processed,
+            skipped_no_markup=skipped_no_markup,
+            gt_samples=gt_samples,
+            no_gt_samples=no_gt_samples,
             plot_url=plot_url,
             plot_url_embed=plot_url_embed,
             json_url=json_url,
+            html_url=html_url,
         )
 
     @app.get("/api/jobs/<job_id>/samples")
@@ -2028,6 +2536,101 @@ def create_app(project_root: Path | None = None) -> Flask:
         job = _get_job(job_id)
         if job is None:
             return jsonify({"error": "Unknown job_id."}), 404
+
+        if job.get("status") != "done" or not job.get("json_file"):
+            return jsonify({"error": "Results not ready for this job."}), 400
+
+        payload = _load_job_json_payload(root, job)
+        if payload is None:
+            return jsonify({"error": "Results JSON not found."}), 404
+
+        job_type = job.get("job_type", "baseline")
+
+        if job_type == "sweep":
+            if not isinstance(payload, dict):
+                return jsonify({"error": "Sweep results JSON has invalid format."}), 500
+
+            records = payload.get("results")
+            if not isinstance(records, list):
+                return jsonify({"error": "Sweep results JSON has invalid format."}), 500
+
+            x_target_param = request.args.get("x_target")
+            gt_only_flag = (request.args.get("gt_only") or "").strip().lower() in {"1", "true", "yes"}
+            no_gt_only_flag = (request.args.get("no_gt_only") or "").strip().lower() in {"1", "true", "yes"}
+
+            if gt_only_flag and no_gt_only_flag:
+                return jsonify({"error": "gt_only and no_gt_only cannot be used together."}), 400
+
+            x_target_filter: float | None = None
+            if x_target_param not in {None, ""}:
+                try:
+                    x_target_filter = float(x_target_param)
+                except ValueError:
+                    return jsonify({"error": "Invalid x_target value."}), 400
+
+            try:
+                limit = int(request.args.get("limit") or 100)
+                offset = int(request.args.get("offset") or 0)
+            except ValueError:
+                return jsonify({"error": "limit and offset must be integers."}), 400
+
+            if limit < 1 or limit > 500:
+                return jsonify({"error": "limit must be in range 1..500."}), 400
+            if offset < 0:
+                return jsonify({"error": "offset must be >= 0."}), 400
+
+            filtered: list[dict[str, Any]] = []
+            for sample_index, rec in enumerate(records):
+                if not isinstance(rec, dict):
+                    continue
+
+                if x_target_filter is not None:
+                    try:
+                        rec_target = float(rec.get("x_target"))
+                    except (TypeError, ValueError):
+                        continue
+                    if abs(rec_target - x_target_filter) > 1e-9:
+                        continue
+
+                expected = str(rec.get("expected") or "")
+                no_gt = not expected.strip()
+
+                if gt_only_flag and no_gt:
+                    continue
+                if no_gt_only_flag and not no_gt:
+                    continue
+
+                accuracy_value: float | None
+                if no_gt:
+                    accuracy_value = None
+                else:
+                    try:
+                        accuracy_value = float(rec.get("accuracy"))
+                    except (TypeError, ValueError):
+                        accuracy_value = None
+
+                filtered.append(
+                    {
+                        "sample_index": sample_index,
+                        "image_path": rec.get("image_path"),
+                        "x_target": rec.get("x_target"),
+                        "module_size_px_current": rec.get("module_size_px_current"),
+                        "scale_factor": rec.get("scale_factor"),
+                        "resized_width": rec.get("resized_width"),
+                        "resized_height": rec.get("resized_height"),
+                        "decode_time_ms": rec.get("decode_time_ms"),
+                        "decode_success": bool(rec.get("decode_success")),
+                        "decoded": rec.get("decoded"),
+                        "expected": expected,
+                        "no_gt": no_gt,
+                        "accuracy": accuracy_value,
+                    }
+                )
+
+            return jsonify(filtered[offset : offset + limit])
+
+        if not isinstance(payload, list):
+            return jsonify({"error": "Results JSON has invalid format."}), 500
 
         bin_param = request.args.get("bin")
         outcome = (request.args.get("outcome") or "").strip().lower()
@@ -2043,23 +2646,6 @@ def create_app(project_root: Path | None = None) -> Flask:
 
         if outcome not in {"failed", "correct"}:
             return jsonify({"error": "Invalid outcome. Use 'failed' or 'correct'."}), 400
-
-        if job.get("status") != "done" or not job.get("json_file"):
-            return jsonify({"error": "Results not ready for this job."}), 400
-
-        outputs_dir = (root / "outputs" / f"{job['engine']}_json_and_graphics").resolve()
-        json_path = (outputs_dir / job["json_file"]).resolve()
-
-        if not json_path.is_file() or not json_path.is_relative_to(outputs_dir):
-            return jsonify({"error": "Results JSON not found."}), 404
-
-        try:
-            records = json.loads(json_path.read_text(encoding="utf-8"))
-        except Exception as exc:
-            return jsonify({"error": f"Failed to read results JSON: {exc}"}), 500
-
-        if not isinstance(records, list):
-            return jsonify({"error": "Results JSON has invalid format."}), 500
 
         dataset_prefix = f"datasets/{job['dataset']}/"
 
@@ -2082,7 +2668,7 @@ def create_app(project_root: Path | None = None) -> Flask:
             return acc == 1.0
 
         filtered = []
-        for rec in records:
+        for rec in payload:
             if not isinstance(rec, dict):
                 continue
             try:
@@ -2117,6 +2703,104 @@ def create_app(project_root: Path | None = None) -> Flask:
             )
 
         return jsonify(filtered)
+
+    @app.get("/api/jobs/<job_id>/sample/<sample_index>")
+    def job_sample_details(job_id: str, sample_index: str):
+        job = _get_job(job_id)
+        if job is None:
+            return jsonify({"error": "Unknown job_id."}), 404
+
+        if job.get("status") != "done" or not job.get("json_file"):
+            return jsonify({"error": "Results not ready for this job."}), 400
+
+        try:
+            index = int(sample_index)
+        except ValueError:
+            return jsonify({"error": "sample_index must be an integer."}), 400
+        if index < 0:
+            return jsonify({"error": "sample_index must be >= 0."}), 400
+
+        payload = _load_job_json_payload(root, job)
+        if payload is None:
+            return jsonify({"error": "Results JSON not found."}), 404
+
+        job_type = job.get("job_type", "baseline")
+
+        if job_type == "sweep":
+            if not isinstance(payload, dict) or not isinstance(payload.get("results"), list):
+                return jsonify({"error": "Sweep results JSON has invalid format."}), 500
+            records = payload["results"]
+            if index >= len(records):
+                return jsonify({"error": "sample_index out of range."}), 404
+
+            rec = records[index]
+            if not isinstance(rec, dict):
+                return jsonify({"error": "Sample record has invalid format."}), 500
+
+            expected = str(rec.get("expected") or "")
+            no_gt = not expected.strip()
+            accuracy_value: float | None = None
+            if not no_gt:
+                try:
+                    accuracy_value = float(rec.get("accuracy"))
+                except (TypeError, ValueError):
+                    accuracy_value = None
+
+            return jsonify(
+                {
+                    "sample_index": index,
+                    "dataset": job.get("dataset"),
+                    "image_path": rec.get("image_path"),
+                    "x_target": rec.get("x_target"),
+                    "module_size_px_current": rec.get("module_size_px_current"),
+                    "scale_factor": rec.get("scale_factor"),
+                    "resized_width": rec.get("resized_width"),
+                    "resized_height": rec.get("resized_height"),
+                    "decode_time_ms": rec.get("decode_time_ms"),
+                    "decode_success": bool(rec.get("decode_success")),
+                    "decoded": rec.get("decoded"),
+                    "expected": expected,
+                    "no_gt": no_gt,
+                    "accuracy": accuracy_value,
+                    "note": "Ground-truth is not provided for this image. Accuracy comparison is skipped." if no_gt else "",
+                }
+            )
+
+        if not isinstance(payload, list):
+            return jsonify({"error": "Results JSON has invalid format."}), 500
+        if index >= len(payload):
+            return jsonify({"error": "sample_index out of range."}), 404
+
+        rec = payload[index]
+        if not isinstance(rec, dict):
+            return jsonify({"error": "Sample record has invalid format."}), 500
+
+        expected = str(rec.get("expected") or "")
+        no_gt = not expected.strip()
+
+        time_value: float | None = None
+        for key in ("time_total_min_sec", "time_total_min", "time"):
+            if key in rec and rec[key] is not None:
+                try:
+                    time_value = float(rec[key])
+                except (TypeError, ValueError):
+                    time_value = None
+                break
+
+        return jsonify(
+            {
+                "sample_index": index,
+                "dataset": job.get("dataset"),
+                "image_path": rec.get("image_path"),
+                "module_size": rec.get("module_size"),
+                "module_size_raw": rec.get("module_size_raw"),
+                "time_total_min_sec": time_value,
+                "decoded": rec.get("decoded"),
+                "expected": expected,
+                "no_gt": no_gt,
+                "accuracy": rec.get("accuracy"),
+            }
+        )
 
     @app.get("/api/datasets/<dataset>/image")
     def dataset_image(dataset: str):
@@ -2184,14 +2868,26 @@ def create_app(project_root: Path | None = None) -> Flask:
         if not images_dir.is_dir():
             return jsonify({"error": "Dataset images folder not found."}), 404
 
-        rel = Path(image_path)
+        normalized_path = image_path.replace("\\", "/").lstrip("/")
+        dataset_prefix = f"datasets/{safe_dataset}/"
+        if normalized_path.startswith(dataset_prefix):
+            normalized_path = normalized_path[len(dataset_prefix):]
+
+        image_prefix = "images/QR_CODE/"
+        rel_candidate = normalized_path
+        if normalized_path.startswith(image_prefix):
+            rel_candidate = normalized_path[len(image_prefix):]
+
+        rel = Path(rel_candidate)
         if rel.is_absolute() or ".." in rel.parts:
             return jsonify({"error": "Invalid image_path."}), 400
 
-        candidate = (dataset_root / rel).resolve()
+        candidate = (images_dir / rel).resolve()
         if not candidate.is_file() or not candidate.is_relative_to(images_dir):
-            # Allow passing just filename (relative to images/QR_CODE)
-            candidate = (images_dir / rel).resolve()
+            alt_rel = Path(normalized_path)
+            if alt_rel.is_absolute() or ".." in alt_rel.parts:
+                return jsonify({"error": "Invalid image_path."}), 400
+            candidate = (dataset_root / alt_rel).resolve()
             if not candidate.is_file() or not candidate.is_relative_to(images_dir):
                 return jsonify({"error": "Image not found or outside images/QR_CODE."}), 404
 
@@ -2238,7 +2934,7 @@ def create_app(project_root: Path | None = None) -> Flask:
                 "decoded": decoded_best,
                 "expected": expected,
                 "time_total_min_sec": float(time_min),
-                "accuracy": int(accuracy),
+                "accuracy": float(accuracy),
             }
         )
 
@@ -2271,8 +2967,10 @@ def create_app(project_root: Path | None = None) -> Flask:
                 if matches:
                     job_id, job = matches[-1]
 
-            if job and request.args.get("embed") != "1":
+            if job and job.get("job_type", "baseline") == "baseline" and request.args.get("embed") != "1":
                 html = _inject_plot_drilldown(html, job_id, job.get("dataset", ""))
+            if job and job.get("job_type", "baseline") == "sweep" and request.args.get("embed") == "1":
+                html = _inject_sweep_embed_cleanup(html)
             return html.encode("utf-8"), 200, {
                 "Content-Type": "text/html; charset=utf-8",
                 "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0",
@@ -2508,7 +3206,7 @@ def _inject_plot_drilldown(html: str, job_id: str, dataset: str) -> str:
 function normalizeImagePath(path) {
           if (!path) return "";
           let p = String(path).replace(/\\\\/g, "/");
-          p = p.replace(/^\/+/, "");
+          p = p.replace(/^\\/+/, "");
           const prefix = `datasets/${dataset}/`;
           if (p.startsWith(prefix)) {
             p = p.slice(prefix.length);
@@ -2620,6 +3318,23 @@ function normalizeImagePath(path) {
     injection = template.replace("__JOB_ID__", job_id).replace("__DATASET__", dataset)
     return html.replace("</body>", injection + "</body>")
 
+
+
+def _inject_sweep_embed_cleanup(html: str) -> str:
+    if "</head>" not in html:
+        return html
+
+    marker = "/* sweep-embed-cleanup */"
+    if marker in html:
+        return html
+
+    style = (
+        "<style>\n"
+        "  /* sweep-embed-cleanup */\n"
+        "  body .layout > section.card:first-child { display: none !important; }\n"
+        "</style>\n"
+    )
+    return html.replace("</head>", style + "</head>", 1)
 
 
 def _content_type(path: Path) -> str:

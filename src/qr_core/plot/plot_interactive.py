@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from html import escape
 from pathlib import Path
 from typing import Sequence
 
@@ -49,6 +50,118 @@ def _warn_if_time_is_binned(x_time_raw: Sequence[float], step_px: int) -> None:
             "Warning: time plot appears to use binned module sizes. "
             "Ensure raw module_size_raw_px is used for time scatter/trend.",
         )
+
+
+def _is_no_gt(expected: str | None) -> bool:
+    return not str(expected or "").strip()
+
+
+def _build_baseline_report_html(
+    fig: go.Figure,
+    *,
+    report_title: str,
+    dataset: str,
+    engine: str,
+    iterations: int,
+    time_mode: str,
+    total_samples: int,
+    gt_samples: int,
+    no_gt_samples: int,
+) -> str:
+    plot_html = fig.to_html(full_html=False, include_plotlyjs=True)
+
+    return """<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Baseline report</title>
+    <style>
+      :root {
+        --bg: #eef3f8;
+        --card: #ffffff;
+        --line: #dbe3ef;
+        --ink: #0f172a;
+        --muted: #475569;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        padding: 20px;
+        font-family: "Space Grotesk", "Sora", "IBM Plex Sans", sans-serif;
+        background: var(--bg);
+        color: var(--ink);
+      }
+      .layout {
+        max-width: 1400px;
+        margin: 0 auto;
+        display: grid;
+        gap: 16px;
+      }
+      .card {
+        background: var(--card);
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        padding: 16px;
+      }
+      .summary-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 10px;
+      }
+      .summary-item {
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        padding: 10px 12px;
+        background: #f8fbff;
+      }
+      .summary-item__label {
+        font-size: 12px;
+        color: var(--muted);
+        margin-bottom: 4px;
+      }
+      .summary-item__value {
+        font-size: 15px;
+        font-weight: 600;
+      }
+      html.is-embed .baseline-summary-card {
+        display: none !important;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="layout">
+      <section class="card baseline-summary-card">
+        <h1 style="margin:0 0 10px;">""" + escape(report_title) + """</h1>
+        <div class="summary-grid">
+          <div class="summary-item"><div class="summary-item__label">Dataset</div><div class="summary-item__value">""" + escape(dataset) + """</div></div>
+          <div class="summary-item"><div class="summary-item__label">Engine</div><div class="summary-item__value">""" + escape(engine) + """</div></div>
+          <div class="summary-item"><div class="summary-item__label">Iterations</div><div class="summary-item__value">""" + str(int(iterations)) + """</div></div>
+          <div class="summary-item"><div class="summary-item__label">Time mode</div><div class="summary-item__value">""" + escape(time_mode) + """</div></div>
+          <div class="summary-item"><div class="summary-item__label">Total samples</div><div class="summary-item__value">""" + str(int(total_samples)) + """</div></div>
+          <div class="summary-item"><div class="summary-item__label">GT samples</div><div class="summary-item__value">""" + str(int(gt_samples)) + """</div></div>
+          <div class="summary-item"><div class="summary-item__label">NO GT samples</div><div class="summary-item__value">""" + str(int(no_gt_samples)) + """</div></div>
+        </div>
+      </section>
+      <section class="card">
+""" + plot_html + """
+      </section>
+    </div>
+    <script>
+      (function () {
+        try {
+          var params = new URLSearchParams(window.location.search || "");
+          if (params.get("embed") === "1") {
+            document.documentElement.classList.add("is-embed");
+          }
+        } catch (err) {
+          // no-op
+        }
+      })();
+    </script>
+  </body>
+</html>
+"""
 
 
 def build_interactive_plot(
@@ -289,5 +402,29 @@ def build_interactive_plot(
     count_upper = max_count * 1.05 if max_count > 0 else 1.0
     fig.update_yaxes(range=[0, count_upper], row=2, col=1)
 
+    first = results_sorted[0]
+    dataset = str(first.dataset)
+    engine = str(first.engine)
+    iterations = int(first.decode_iterations)
+    time_mode = str(first.time_mode)
+
+    total_samples = len(results_sorted)
+    no_gt_samples = sum(1 for item in results_sorted if _is_no_gt(item.expected))
+    gt_samples = total_samples - no_gt_samples
+
+    report_title = f"QR baseline run ({dataset}, {engine})"
+
+    html = _build_baseline_report_html(
+        fig,
+        report_title=report_title,
+        dataset=dataset,
+        engine=engine,
+        iterations=iterations,
+        time_mode=time_mode,
+        total_samples=total_samples,
+        gt_samples=gt_samples,
+        no_gt_samples=no_gt_samples,
+    )
+
     output_html.parent.mkdir(parents=True, exist_ok=True)
-    fig.write_html(str(output_html), include_plotlyjs=True, full_html=True)
+    output_html.write_text(html, encoding="utf-8")
