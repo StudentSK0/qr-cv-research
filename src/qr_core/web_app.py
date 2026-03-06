@@ -550,11 +550,11 @@ INDEX_TEMPLATE = """<!doctype html>
               <div class="mode-switch" role="radiogroup" aria-label="Benchmark mode">
                 <label class="mode-switch__option">
                   <input type="radio" name="run_mode" value="baseline" {% if run_mode != 'sweep' %}checked{% endif %}>
-                  <span>Baseline</span>
+                  <span>source dataset</span>
                 </label>
                 <label class="mode-switch__option">
                   <input type="radio" name="run_mode" value="sweep" {% if run_mode == 'sweep' %}checked{% endif %}>
-                  <span>Normalization sweep (target module size)</span>
+                  <span>dataset with a single module size</span>
                 </label>
               </div>
             </div>
