@@ -19,6 +19,7 @@ pyparsing==3.2.5
 pyzbar==0.1.9
 python-dateutil==2.9.0.post0
 pyzxing==1.1.1
+zxing-cpp
 scipy==1.16.3
 setuptools==80.9.0
 six==1.17.0

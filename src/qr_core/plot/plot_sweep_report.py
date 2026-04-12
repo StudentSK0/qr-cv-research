@@ -243,7 +243,21 @@ def build_sweep_report(
 
     for idx, item in enumerate(sorted_results):
         no_gt = _is_no_gt(item.expected)
-        accuracy_value: float | None = None if no_gt else float(item.accuracy)
+        metric_kind_raw = str(getattr(item, "metric_kind", "") or "").strip()
+        if metric_kind_raw in {"gt_accuracy", "decode_success_rate"}:
+            metric_kind = metric_kind_raw
+        else:
+            gt_accuracy_probe = getattr(item, "gt_accuracy", None)
+            if (not no_gt) and gt_accuracy_probe is not None:
+                metric_kind = "gt_accuracy"
+            else:
+                metric_kind = "decode_success_rate"
+        decode_success_rate = float(getattr(item, "decode_success_rate", 1.0 if item.decode_success else 0.0))
+        gt_accuracy_raw = getattr(item, "gt_accuracy", None)
+        gt_accuracy_value = float(gt_accuracy_raw) if gt_accuracy_raw is not None else None
+        accuracy_value: float | None = float(item.accuracy) if item.accuracy is not None else (
+            decode_success_rate if metric_kind == "decode_success_rate" else gt_accuracy_value
+        )
 
         decoded_text = str(item.decoded or "")
         expected_text = str(item.expected or "")
@@ -261,13 +275,16 @@ def build_sweep_report(
             "decode_success": bool(item.decode_success),
             "decoded": decoded_text,
             "expected": expected_text,
+            "metric_kind": metric_kind,
+            "decode_success_rate": decode_success_rate,
+            "gt_accuracy": gt_accuracy_value,
             "accuracy": accuracy_value,
             "no_gt": no_gt,
         }
         sample_data.append(sample_payload)
 
         expected_display = "N/A (no ground-truth)" if no_gt else _truncate(expected_text)
-        accuracy_display = "N/A" if no_gt else f"{float(item.accuracy):.3f}"
+        accuracy_display = "n/a" if accuracy_value is None else f"{float(accuracy_value):.3f}"
         no_gt_badge = '<span class="no-gt-badge">NO GT</span>' if no_gt else ""
         success_display = "yes" if item.decode_success else "no"
 
@@ -518,8 +535,23 @@ def build_sweep_report(
       }
       .sample-item__actions {
         display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 6px;
+      }
+      .sample-item__button-row {
+        display: flex;
         align-items: center;
+        justify-content: flex-end;
         gap: 8px;
+        flex-wrap: wrap;
+      }
+      .sample-item__run-result {
+        font-size: 12px;
+        color: #334155;
+        text-align: right;
+        line-height: 1.35;
+        max-width: 320px;
       }
       .small {
         font-size: 12px;
@@ -593,7 +625,7 @@ def build_sweep_report(
                 '<h2 style="margin:0 0 10px;">Per-image results</h2>',
                 '<div class="toolbar">',
                 '<input id="sampleSearch" type="search" placeholder="Search image_path / decoded / expected...">',
-                '<span class="small">Click headers to sort. Accuracy is N/A for NO GT samples.</span>',
+                '<span class="small">Click headers to sort. Accuracy = gt_accuracy for GT samples and decode_success_rate for NO GT samples.</span>',
                 '</div>',
                 '<div class="table-wrap">',
                 '<table id="samplesTable">',
@@ -633,7 +665,7 @@ def build_sweep_report(
             <div id="detailsMeta" class="modal__meta"></div>
             <div><strong>decoded</strong>: <span id="detailsDecoded"></span></div>
             <div style="margin-top:6px;"><strong>expected (if provided)</strong>: <span id="detailsExpected"></span></div>
-            <div id="detailsNoGt" class="modal__note" style="display:none;">Ground-truth is not provided for this image. Accuracy comparison is skipped.</div>
+            <div id="detailsNoGt" class="modal__note" style="display:none;">Ground-truth is not provided for this image. Accuracy is reported as decode_success_rate.</div>
             <div style="margin-top:10px;"><img id="detailsImage" alt="sample" style="max-width:100%; max-height:320px; border:1px solid var(--line); border-radius:10px; display:none;"></div>
           </div>
         </div>
@@ -731,6 +763,48 @@ async function fetchSampleDetails(index) {
   }
 }
 
+async function runSingleSample(imagePath, xTarget, button, resultEl) {
+  if (!jobId) {
+    resultEl.textContent = "job_id is missing in URL.";
+    return;
+  }
+  if (!imagePath) {
+    resultEl.textContent = "Missing image path.";
+    return;
+  }
+  const targetValue = Number(xTarget);
+  if (!Number.isFinite(targetValue)) {
+    resultEl.textContent = "Missing x_target.";
+    return;
+  }
+
+  button.disabled = true;
+  resultEl.textContent = "Running...";
+  try {
+    const resp = await fetch(`/api/jobs/${jobId}/run_single`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ image_path: imagePath, x_target: targetValue }),
+    });
+    const data = await resp.json();
+    if (!resp.ok) {
+      resultEl.textContent = data && data.error ? data.error : "Failed.";
+      return;
+    }
+
+    const time = data.time_total_min_sec != null ? Number(data.time_total_min_sec).toFixed(6) : "n/a";
+    const acc = data.accuracy != null ? Number(data.accuracy).toFixed(3) : "n/a";
+    const metricKind = String(data.metric_kind || "").trim() || "accuracy";
+    const decoded = String(data.decoded || data.decoded_best || "");
+    const expected = String(data.expected || "");
+    resultEl.textContent = `time=${time}s, ${metricKind}=${acc}, decoded="${decoded}", expected="${expected}"`;
+  } catch (err) {
+    resultEl.textContent = "Request failed.";
+  } finally {
+    button.disabled = false;
+  }
+}
+
 async function openSampleDetails(index) {
   const sample = await fetchSampleDetails(index);
   if (!sample) {
@@ -742,13 +816,14 @@ async function openSampleDetails(index) {
   const expectedText = sample.no_gt ? "N/A (no ground-truth)" : (sample.expected || "");
   byId("detailsExpected").textContent = expectedText;
 
-  const accuracyText = sample.no_gt || sample.accuracy == null ? "N/A" : Number(sample.accuracy).toFixed(3);
+  const metricKind = String(sample.metric_kind || "").trim() || (sample.no_gt ? "decode_success_rate" : "gt_accuracy");
+  const accuracyText = sample.accuracy == null ? "n/a" : Number(sample.accuracy).toFixed(3);
   const successText = sample.decode_success ? "yes" : "no";
   const meta = [
     `<div><strong>x_target</strong><br>${sample.x_target ?? ""}</div>`,
     `<div><strong>decode_time_ms</strong><br>${sample.decode_time_ms != null ? Number(sample.decode_time_ms).toFixed(3) : ""}</div>`,
     `<div><strong>decode_success</strong><br>${successText}</div>`,
-    `<div><strong>accuracy</strong><br>${accuracyText}</div>`,
+    `<div><strong>${metricKind}</strong><br>${accuracyText}</div>`,
     `<div><strong>scale_factor</strong><br>${sample.scale_factor != null ? Number(sample.scale_factor).toFixed(3) : ""}</div>`,
     `<div><strong>resized</strong><br>${sample.resized_width || ""} x ${sample.resized_height || ""}</div>`,
   ];
@@ -863,33 +938,56 @@ function renderDrilldownList(items) {
     const meta = document.createElement("div");
     meta.className = "sample-item__meta";
     const timeText = item.decode_time_ms != null ? `${Number(item.decode_time_ms).toFixed(3)} ms` : "n/a";
-    const accText = item.no_gt || item.accuracy == null ? "N/A" : Number(item.accuracy).toFixed(3);
-    meta.textContent = `decode_success=${item.decode_success ? "yes" : "no"}, accuracy=${accText}, time=${timeText}`;
+    const metricKind = String(item.metric_kind || "").trim() || (item.no_gt ? "decode_success_rate" : "gt_accuracy");
+    const accText = item.accuracy == null ? "n/a" : Number(item.accuracy).toFixed(3);
+    meta.textContent = `decode_success=${item.decode_success ? "yes" : "no"}, ${metricKind}=${accText}, time=${timeText}`;
 
     textWrap.appendChild(link);
     textWrap.appendChild(meta);
 
     const actions = document.createElement("div");
     actions.className = "sample-item__actions";
+    const buttonRow = document.createElement("div");
+    buttonRow.className = "sample-item__button-row";
 
     if (item.no_gt) {
       const badge = document.createElement("span");
       badge.className = "no-gt-badge";
       badge.textContent = "NO GT";
-      actions.appendChild(badge);
+      buttonRow.appendChild(badge);
     }
 
-    const btn = document.createElement("button");
-    btn.type = "button";
-    btn.className = "details-btn";
-    btn.textContent = "Details";
-    btn.addEventListener("click", () => {
+    const detailsBtn = document.createElement("button");
+    detailsBtn.type = "button";
+    detailsBtn.className = "details-btn";
+    detailsBtn.textContent = "Details";
+    detailsBtn.addEventListener("click", () => {
       if (Number.isInteger(item.sample_index)) {
         openSampleDetails(item.sample_index);
       }
     });
+    buttonRow.appendChild(detailsBtn);
 
-    actions.appendChild(btn);
+    actions.appendChild(buttonRow);
+
+    if (jobId) {
+      const runBtn = document.createElement("button");
+      runBtn.type = "button";
+      runBtn.className = "details-btn";
+      runBtn.textContent = "Run on this image";
+
+      const runResult = document.createElement("div");
+      runResult.className = "sample-item__run-result";
+
+      runBtn.addEventListener("click", () => {
+        const normalizedPath = normalizeImagePath(item.image_path);
+        const pathToRun = normalizedPath || item.image_path;
+        runSingleSample(pathToRun, item.x_target, runBtn, runResult);
+      });
+
+      buttonRow.appendChild(runBtn);
+      actions.appendChild(runResult);
+    }
 
     li.appendChild(textWrap);
     li.appendChild(actions);

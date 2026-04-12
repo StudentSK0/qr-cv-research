@@ -30,7 +30,7 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-
+`zxing_cpp` engine uses the Python package `zxing-cpp` (included in requirements).
 
 4) Also install system dependency for ZBar
 

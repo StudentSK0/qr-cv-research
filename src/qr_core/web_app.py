@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import math
 import re
 import shutil
 import threading
@@ -25,7 +26,7 @@ from .metrics import (
     save_normalization_sweep_json,
     save_results_json,
 )
-from .markup import extract_expected_value, read_markup
+from .markup import extract_expected_value, extract_module_size_px, read_markup
 from .plot.plot_interactive import build_interactive_plot
 from .plot.plot_sweep_report import build_sweep_report
 
@@ -1638,11 +1639,12 @@ RESULT_TEMPLATE = """<!doctype html>
             }
             const time = data.time_total_min_sec != null ? data.time_total_min_sec.toFixed(6) : "n/a";
             const acc = data.accuracy != null ? data.accuracy.toFixed(3) : "n/a";
+            const metricKind = (data.metric_kind || "accuracy");
             const decoded = data.decoded || data.decoded_best || "";
             const expected = data.expected || "";
             resultEl.innerHTML = [
               `<span class="modal__label">time</span> = ${time}s`,
-              `<span class="modal__label">accuracy</span> = ${acc}`,
+              `<span class="modal__label">${metricKind}</span> = ${acc}`,
               `<span class="modal__label">decoded</span> = "${escapeHtml(decoded)}"`,
               `<span class="modal__label">expected</span> (if provided) = "${escapeHtml(expected)}"`,
             ].join("<br>");
@@ -2280,6 +2282,45 @@ def _compute_gt_no_gt_counts(payload: Any) -> tuple[int, int]:
     return gt_samples, no_gt_samples
 
 
+def _coerce_optional_float(value: Any) -> float | None:
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return None
+
+
+def _metric_kind_from_record(rec: dict[str, Any], expected: str) -> str:
+    kind = rec.get("metric_kind")
+    if isinstance(kind, str) and kind in {"gt_accuracy", "decode_success_rate"}:
+        return kind
+
+    gt_accuracy = _coerce_optional_float(rec.get("gt_accuracy"))
+    if expected.strip() and gt_accuracy is not None:
+        return "gt_accuracy"
+
+    decode_success_rate = _coerce_optional_float(rec.get("decode_success_rate"))
+    if decode_success_rate is not None:
+        return "decode_success_rate"
+
+    if "decode_success" in rec:
+        return "decode_success_rate"
+
+    # Legacy payload fallback: historical accuracy semantics were decode-success based.
+    return "decode_success_rate"
+
+
+def _resolve_accuracy(decoded_values: list[str], expected: str) -> tuple[float, float | None, float, str]:
+    success_list = [1.0 if val.strip() else 0.0 for val in decoded_values]
+    decode_success_rate = sum(success_list) / float(len(success_list)) if success_list else 0.0
+
+    if expected.strip():
+        gt_hits = [1.0 if val == expected else 0.0 for val in decoded_values]
+        gt_accuracy = sum(gt_hits) / float(len(gt_hits)) if gt_hits else 0.0
+        return float(decode_success_rate), float(gt_accuracy), float(gt_accuracy), "gt_accuracy"
+
+    return float(decode_success_rate), None, float(decode_success_rate), "decode_success_rate"
+
+
 def create_app(project_root: Path | None = None) -> Flask:
     root = project_root or _resolve_project_root()
     app = Flask(__name__)
@@ -2463,7 +2504,7 @@ def create_app(project_root: Path | None = None) -> Flask:
         if job is None:
             abort(404)
 
-        mode_label = "dataset with a single module size" if job.get("job_type") == "sweep" else "Baseline"
+        mode_label = "dataset with a single module size" if job.get("job_type") == "sweep" else "source dataset"
         x_targets_text = ", ".join(str(x) for x in job.get("x_targets", []))
 
         return render_template_string(
@@ -2513,7 +2554,7 @@ def create_app(project_root: Path | None = None) -> Flask:
         html_url = url_for("serve_output", engine=job["engine"], filename=job["html_file"])
 
         job_type = job.get("job_type", "baseline")
-        mode_label = "dataset with a single module size" if job_type == "sweep" else "Baseline"
+        mode_label = "dataset with a single module size" if job_type == "sweep" else "source dataset"
         x_targets_text = ", ".join(str(x) for x in job.get("x_targets", []))
 
         payload = _load_job_json_payload(root, job)
@@ -2612,20 +2653,18 @@ def create_app(project_root: Path | None = None) -> Flask:
 
                 expected = str(rec.get("expected") or "")
                 no_gt = not expected.strip()
+                metric_kind = _metric_kind_from_record(rec, expected)
 
                 if gt_only_flag and no_gt:
                     continue
                 if no_gt_only_flag and not no_gt:
                     continue
 
-                accuracy_value: float | None
-                if no_gt:
-                    accuracy_value = None
-                else:
-                    try:
-                        accuracy_value = float(rec.get("accuracy"))
-                    except (TypeError, ValueError):
-                        accuracy_value = None
+                accuracy_value = _coerce_optional_float(rec.get("accuracy"))
+                if accuracy_value is None and metric_kind == "decode_success_rate":
+                    # Backward-compat fallback for old payloads where only decode_success exists.
+                    if "decode_success" in rec:
+                        accuracy_value = 1.0 if bool(rec.get("decode_success")) else 0.0
 
                 filtered.append(
                     {
@@ -2641,6 +2680,9 @@ def create_app(project_root: Path | None = None) -> Flask:
                         "decoded": rec.get("decoded"),
                         "expected": expected,
                         "no_gt": no_gt,
+                        "metric_kind": metric_kind,
+                        "decode_success_rate": _coerce_optional_float(rec.get("decode_success_rate")),
+                        "gt_accuracy": _coerce_optional_float(rec.get("gt_accuracy")),
                         "accuracy": accuracy_value,
                     }
                 )
@@ -2757,12 +2799,11 @@ def create_app(project_root: Path | None = None) -> Flask:
 
             expected = str(rec.get("expected") or "")
             no_gt = not expected.strip()
-            accuracy_value: float | None = None
-            if not no_gt:
-                try:
-                    accuracy_value = float(rec.get("accuracy"))
-                except (TypeError, ValueError):
-                    accuracy_value = None
+            metric_kind = _metric_kind_from_record(rec, expected)
+            accuracy_value = _coerce_optional_float(rec.get("accuracy"))
+            if accuracy_value is None and metric_kind == "decode_success_rate":
+                if "decode_success" in rec:
+                    accuracy_value = 1.0 if bool(rec.get("decode_success")) else 0.0
 
             return jsonify(
                 {
@@ -2779,8 +2820,11 @@ def create_app(project_root: Path | None = None) -> Flask:
                     "decoded": rec.get("decoded"),
                     "expected": expected,
                     "no_gt": no_gt,
+                    "metric_kind": metric_kind,
+                    "decode_success_rate": _coerce_optional_float(rec.get("decode_success_rate")),
+                    "gt_accuracy": _coerce_optional_float(rec.get("gt_accuracy")),
                     "accuracy": accuracy_value,
-                    "note": "Ground-truth is not provided for this image. Accuracy comparison is skipped." if no_gt else "",
+                    "note": "Ground-truth is not provided for this image. Accuracy is reported as decode_success_rate." if no_gt else "",
                 }
             )
 
@@ -2795,6 +2839,7 @@ def create_app(project_root: Path | None = None) -> Flask:
 
         expected = str(rec.get("expected") or "")
         no_gt = not expected.strip()
+        metric_kind = _metric_kind_from_record(rec, expected)
 
         time_value: float | None = None
         for key in ("time_total_min_sec", "time_total_min", "time"):
@@ -2816,6 +2861,9 @@ def create_app(project_root: Path | None = None) -> Flask:
                 "decoded": rec.get("decoded"),
                 "expected": expected,
                 "no_gt": no_gt,
+                "metric_kind": metric_kind,
+                "decode_success_rate": _coerce_optional_float(rec.get("decode_success_rate")),
+                "gt_accuracy": _coerce_optional_float(rec.get("gt_accuracy")),
                 "accuracy": rec.get("accuracy"),
             }
         )
@@ -2863,10 +2911,28 @@ def create_app(project_root: Path | None = None) -> Flask:
         if job is None:
             return jsonify({"error": "Unknown job_id."}), 404
 
-        payload = request.get_json(silent=True) or request.form or {}
-        image_path = payload.get("image_path") if isinstance(payload, dict) else None
+        payload_json = request.get_json(silent=True)
+        if isinstance(payload_json, dict):
+            payload: dict[str, Any] = payload_json
+        else:
+            payload = request.form.to_dict(flat=True)
+
+        image_path = payload.get("image_path")
         if not image_path or not isinstance(image_path, str):
             return jsonify({"error": "Missing or invalid image_path."}), 400
+        job_type = str(job.get("job_type") or "baseline")
+
+        x_target: float | None = None
+        if job_type == "sweep":
+            x_target_raw = payload.get("x_target")
+            if x_target_raw in {None, ""}:
+                return jsonify({"error": "x_target is required for sweep mode."}), 400
+            try:
+                x_target = float(x_target_raw)
+            except (TypeError, ValueError):
+                return jsonify({"error": "Invalid x_target value."}), 400
+            if not math.isfinite(x_target) or x_target <= 0:
+                return jsonify({"error": "x_target must be a positive finite number."}), 400
 
         dataset = job.get("dataset")
         engine_key = job.get("engine")
@@ -2928,22 +2994,58 @@ def create_app(project_root: Path | None = None) -> Flask:
 
         decoded_values = []
         times = []
-        for _ in range(max(1, iterations)):
+        if job_type == "sweep":
             try:
-                decoded, time_total = engine.decode_once(candidate)
-            except EngineError as exc:
-                return jsonify({"error": f"Decode failed: {exc}"}), 500
-            decoded_text = decoded.decode("utf-8", errors="ignore") if isinstance(decoded, bytes) else str(decoded)
-            decoded_values.append(decoded_text)
-            times.append(float(time_total))
+                import cv2
+            except Exception as exc:
+                return jsonify({"error": f"OpenCV import failed: {exc}"}), 500
+
+            module_size_raw = extract_module_size_px(markup)
+            if module_size_raw is None or module_size_raw <= 0:
+                return jsonify({"error": "Invalid or missing module_size_raw in markup."}), 400
+
+            assert x_target is not None
+            scale_factor = float(x_target) / float(module_size_raw)
+            if not math.isfinite(scale_factor) or scale_factor <= 0:
+                return jsonify({"error": "Invalid scale factor computed from x_target/module_size_raw."}), 400
+
+            image = cv2.imread(str(candidate))
+            if image is None:
+                return jsonify({"error": "Failed to read image for sweep run."}), 400
+
+            height, width = image.shape[:2]
+            new_w = max(1, int(round(width * scale_factor)))
+            new_h = max(1, int(round(height * scale_factor)))
+
+            resized_img = image
+            if new_w != width or new_h != height:
+                interpolation = cv2.INTER_LINEAR if scale_factor > 1.0 else cv2.INTER_AREA
+                resized_img = cv2.resize(image, (new_w, new_h), interpolation=interpolation)
+
+            for _ in range(max(1, iterations)):
+                try:
+                    decoded, time_total = engine.decode_array_once(resized_img)
+                except EngineError as exc:
+                    return jsonify({"error": f"Decode failed: {exc}"}), 500
+                decoded_text = decoded.decode("utf-8", errors="ignore") if isinstance(decoded, bytes) else str(decoded)
+                decoded_values.append(decoded_text)
+                times.append(float(time_total))
+        else:
+            for _ in range(max(1, iterations)):
+                try:
+                    decoded, time_total = engine.decode_once(candidate)
+                except EngineError as exc:
+                    return jsonify({"error": f"Decode failed: {exc}"}), 500
+                decoded_text = decoded.decode("utf-8", errors="ignore") if isinstance(decoded, bytes) else str(decoded)
+                decoded_values.append(decoded_text)
+                times.append(float(time_total))
 
         if not times:
             return jsonify({"error": "No timing data collected."}), 500
 
         time_min = min(times)
         decoded_best = Counter(decoded_values).most_common(1)[0][0] if decoded_values else ""
-        success_list = [1.0 if val.strip() else 0.0 for val in decoded_values]
-        accuracy = sum(success_list) / float(len(success_list)) if success_list else 0.0
+        decode_success_rate, gt_accuracy, accuracy, metric_kind = _resolve_accuracy(decoded_values, expected)
 
         return jsonify(
             {
@@ -2952,6 +3054,9 @@ def create_app(project_root: Path | None = None) -> Flask:
                 "decoded": decoded_best,
                 "expected": expected,
                 "time_total_min_sec": float(time_min),
+                "decode_success_rate": float(decode_success_rate),
+                "gt_accuracy": None if gt_accuracy is None else float(gt_accuracy),
+                "metric_kind": metric_kind,
                 "accuracy": float(accuracy),
             }
         )
@@ -3255,11 +3360,12 @@ function normalizeImagePath(path) {
             }
             const time = data.time_total_min_sec != null ? data.time_total_min_sec.toFixed(6) : "n/a";
             const acc = data.accuracy != null ? data.accuracy.toFixed(3) : "n/a";
-                        const decoded = data.decoded || data.decoded_best || "";
+            const metricKind = (data.metric_kind || "accuracy");
+            const decoded = data.decoded || data.decoded_best || "";
             const expected = data.expected || "";
             resultEl.innerHTML = [
               `<span class=\"modal__label\">time</span> = ${time}s`,
-              `<span class=\"modal__label\">accuracy</span> = ${acc}`,
+              `<span class=\"modal__label\">${metricKind}</span> = ${acc}`,
               `<span class=\"modal__label\">decoded</span> = \"${escapeHtml(decoded)}\"`,
               `<span class=\"modal__label\">expected</span> (if provided) = \"${escapeHtml(expected)}\"`,
             ].join("<br>");

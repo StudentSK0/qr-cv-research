@@ -30,6 +30,9 @@ class SampleResult:
     module_bin_step_px: int
     time_total_min_sec: float
     time_mode: str
+    decode_success_rate: float
+    gt_accuracy: float | None
+    metric_kind: str
     accuracy: float
     decoded: str
     expected: str
@@ -66,6 +69,9 @@ class NormalizedSampleResult:
     resized_height: int
     decode_time_ms: float
     decode_success: bool
+    decode_success_rate: float
+    gt_accuracy: float | None
+    metric_kind: str
     accuracy: float
     decoded: str
     expected: str
@@ -152,8 +158,7 @@ def run_experiment(
             continue
 
         time_min = min(times)
-        acc_list = [1.0 if val.strip() else 0.0 for val in decoded_values]
-        accuracy = sum(acc_list) / float(len(acc_list)) if acc_list else 0.0
+        decode_success_rate, gt_accuracy, accuracy, metric_kind = _resolve_accuracy(decoded_values, expected)
         decoded_best = Counter(decoded_values).most_common(1)[0][0] if decoded_values else ""
 
         image_rel = _relative_path(image_path, project_root)
@@ -167,6 +172,9 @@ def run_experiment(
                 module_bin_step_px=int(cfg.module_bin_step_px),
                 time_total_min_sec=float(time_min),
                 time_mode=cfg.time_mode,
+                decode_success_rate=float(decode_success_rate),
+                gt_accuracy=None if gt_accuracy is None else float(gt_accuracy),
+                metric_kind=metric_kind,
                 accuracy=float(accuracy),
                 decoded=decoded_best,
                 expected=expected,
@@ -273,8 +281,7 @@ def run_module_size_normalization_sweep(
                 continue
 
             time_min_sec = min(times)
-            success_list = [1.0 if val.strip() else 0.0 for val in decoded_values]
-            accuracy = sum(success_list) / float(len(success_list)) if success_list else 0.0
+            decode_success_rate, gt_accuracy, accuracy, metric_kind = _resolve_accuracy(decoded_values, expected)
             decoded_best = Counter(decoded_values).most_common(1)[0][0] if decoded_values else ""
             decode_success = any(val.strip() for val in decoded_values)
 
@@ -290,6 +297,9 @@ def run_module_size_normalization_sweep(
                     resized_height=int(resized_h),
                     decode_time_ms=float(time_min_sec * 1000.0),
                     decode_success=bool(decode_success),
+                    decode_success_rate=float(decode_success_rate),
+                    gt_accuracy=None if gt_accuracy is None else float(gt_accuracy),
+                    metric_kind=metric_kind,
                     accuracy=float(accuracy),
                     decoded=decoded_best,
                     expected=expected,
@@ -366,6 +376,18 @@ def _safe_str(value: Any) -> str:
     if isinstance(value, bytes):
         return value.decode("utf-8", errors="ignore")
     return str(value)
+
+
+def _resolve_accuracy(decoded_values: list[str], expected: str) -> tuple[float, float | None, float, str]:
+    success_list = [1.0 if val.strip() else 0.0 for val in decoded_values]
+    decode_success_rate = sum(success_list) / float(len(success_list)) if success_list else 0.0
+
+    if expected.strip():
+        gt_hits = [1.0 if val == expected else 0.0 for val in decoded_values]
+        gt_accuracy = sum(gt_hits) / float(len(gt_hits)) if gt_hits else 0.0
+        return float(decode_success_rate), float(gt_accuracy), float(gt_accuracy), "gt_accuracy"
+
+    return float(decode_success_rate), None, float(decode_success_rate), "decode_success_rate"
 
 
 def _relative_path(path: Path, root: Path) -> str:

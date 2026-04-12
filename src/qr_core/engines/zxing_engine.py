@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 from pathlib import Path
+from tempfile import NamedTemporaryFile
+from typing import Any
 
 from .base import BaseEngine, ImageReadError
 
@@ -24,6 +26,41 @@ class ZXingEngine(BaseEngine):
         except Exception as exc:
             raise ImageReadError(f"ZXing failed to read image: {image_path}") from exc
 
+        return self._extract_parsed_value(result)
+
+    def _decode_array(self, image: Any) -> str:
+        if image is None:
+            raise ImageReadError("Failed to decode from empty image.")
+
+        try:
+            import cv2
+        except Exception as exc:
+            raise ImageReadError("OpenCV is required for ZXing in-memory decode.") from exc
+
+        try:
+            encoded_ok, encoded = cv2.imencode(".png", image)
+        except Exception as exc:
+            raise ImageReadError("Failed to encode image array for ZXing.") from exc
+
+        if not encoded_ok:
+            raise ImageReadError("Failed to encode image array for ZXing.")
+
+        temp_path: Path | None = None
+        try:
+            with NamedTemporaryFile(prefix="qr_zxing_", suffix=".png", delete=False) as tmp:
+                tmp.write(encoded.tobytes())
+                temp_path = Path(tmp.name)
+            return self._decode(temp_path)
+        finally:
+            if temp_path is not None:
+                try:
+                    temp_path.unlink(missing_ok=True)
+                except Exception:
+                    # Best-effort cleanup for temporary files.
+                    pass
+
+    @staticmethod
+    def _extract_parsed_value(result: Any) -> str:
         if not result:
             return ""
 
