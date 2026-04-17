@@ -44,5 +44,8 @@ class OpenCVEngine(BaseEngine):
             if isinstance(decoded_info, str):
                 return decoded_info or ""
 
-        decoded_str, _, _ = self._detector.detectAndDecode(image)
+        try:
+            decoded_str, _, _ = self._detector.detectAndDecode(image)
+        except Exception:
+            return ""
         return str(decoded_str) if decoded_str else ""

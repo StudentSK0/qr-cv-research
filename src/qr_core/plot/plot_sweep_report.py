@@ -10,6 +10,7 @@ import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
 from ..metrics import NormalizationSweepSummary, NormalizedSampleResult
+from ..selection import select_optimal_sweep_target
 
 
 def _is_no_gt(expected: str | None) -> bool:
@@ -47,8 +48,11 @@ def _build_target_stats(results: Sequence[NormalizedSampleResult]) -> list[dict[
         rows = grouped[x_target]
         times = [float(r.decode_time_ms) for r in rows]
         success = [1.0 if bool(r.decode_success) else 0.0 for r in rows]
+        accuracies = [float(r.accuracy) for r in rows]
         no_gt_count = sum(1 for r in rows if _is_no_gt(r.expected))
         gt_count = len(rows) - no_gt_count
+        time_p10 = _percentile(times, 10.0)
+        time_p90 = _percentile(times, 90.0)
 
         stats.append(
             {
@@ -57,11 +61,13 @@ def _build_target_stats(results: Sequence[NormalizedSampleResult]) -> list[dict[
                 "gt_count": gt_count,
                 "no_gt_count": no_gt_count,
                 "success_rate": float(mean(success) * 100.0) if success else 0.0,
+                "accuracy_rate": float(mean(accuracies) * 100.0) if accuracies else 0.0,
                 "time_mean_ms": float(mean(times)) if times else 0.0,
                 "time_median_ms": float(median(times)) if times else 0.0,
-                "time_p10_ms": _percentile(times, 10.0),
-                "time_p90_ms": _percentile(times, 90.0),
+                "time_p10_ms": time_p10,
+                "time_p90_ms": time_p90,
                 "time_p95_ms": _percentile(times, 95.0),
+                "spread_ms": max(0.0, float(time_p90) - float(time_p10)),
             }
         )
 
@@ -80,7 +86,7 @@ def _build_plot_html(target_stats: Sequence[dict[str, Any]], title: str) -> str:
         rows=2,
         cols=1,
         shared_xaxes=True,
-        vertical_spacing=0.08,
+        vertical_spacing=0.13,
         row_heights=[0.60, 0.40],
         subplot_titles=(
             "Decode time by normalized module size target",
@@ -173,6 +179,7 @@ def _build_plot_html(target_stats: Sequence[dict[str, Any]], title: str) -> str:
     )
     fig.update_yaxes(title_text="Decode time (ms)", row=1, col=1)
     fig.update_yaxes(title_text="Success rate (%)", range=[0, 100], row=2, col=1)
+    fig.update_xaxes(showticklabels=True, row=1, col=1)
     fig.update_xaxes(title_text="x_target (px)", row=2, col=1)
 
     return fig.to_html(full_html=False, include_plotlyjs=True)
@@ -205,6 +212,66 @@ def build_sweep_report(
     }
 
     x_targets_text = ", ".join(f"{float(x):g}" for x in sorted(set(float(x) for x in x_targets)))
+    optimal_analysis = select_optimal_sweep_target(
+        target_stats,
+        eps_pp=2.0,
+        lambda_spread=0.15,
+        use_pareto_prefilter=True,
+    )
+    recommended = optimal_analysis.get("recommended")
+    quality_metric = str(optimal_analysis.get("quality_metric") or "success_rate")
+    quality_label = "accuracy" if quality_metric == "accuracy_rate" else "decode success"
+
+    def _format_x_targets(items: Sequence[dict[str, Any]]) -> str:
+        if not items:
+            return "n/a"
+        return ", ".join(f"{float(item['x_target']):g}" for item in items)
+
+    plateau_targets_text = _format_x_targets(optimal_analysis.get("plateau_points") or [])
+    candidate_targets_text = _format_x_targets(optimal_analysis.get("candidate_points") or [])
+    pareto_targets_text = _format_x_targets(optimal_analysis.get("pareto_points") or [])
+
+
+    if isinstance(recommended, dict):
+        recommended_x_target_text = f"{float(recommended['x_target']):g} px"
+        recommended_quality_text = f"{float(recommended[quality_metric]):.2f}%"
+        recommended_time_text = f"{float(recommended['time_median_ms']):.3f} ms"
+        recommended_spread_text = f"{float(recommended['spread_ms']):.3f} ms"
+    else:
+        recommended_x_target_text = "n/a"
+        recommended_quality_text = "n/a"
+        recommended_time_text = "n/a"
+        recommended_spread_text = "n/a"
+
+    def _safe_float(value: Any, default: float = 0.0) -> float:
+        try:
+            parsed = float(value)
+        except (TypeError, ValueError):
+            return float(default)
+        return parsed
+
+    max_quality_point: dict[str, Any] | None = None
+    if target_stats:
+        max_quality_point = max(
+            target_stats,
+            key=lambda row: (
+                _safe_float(row.get(quality_metric), 0.0),
+                -_safe_float(row.get("time_median_ms"), float("inf")),
+                -_safe_float(row.get("spread_ms"), float("inf")),
+                -_safe_float(row.get("x_target"), float("inf")),
+            ),
+        )
+
+    if max_quality_point is not None:
+        max_quality_x_target_text = f"{_safe_float(max_quality_point.get('x_target')):g} px"
+        max_quality_quality_text = f"{_safe_float(max_quality_point.get(quality_metric)):.2f}%"
+        max_quality_time_text = f"{_safe_float(max_quality_point.get('time_median_ms')):.3f} ms"
+        max_quality_spread_text = f"{_safe_float(max_quality_point.get('spread_ms')):.3f} ms"
+    else:
+        max_quality_x_target_text = "n/a"
+        max_quality_quality_text = "n/a"
+        max_quality_time_text = "n/a"
+        max_quality_spread_text = "n/a"
 
     target_summary_rows = []
     for row in target_stats:
@@ -388,12 +455,16 @@ def build_sweep_report(
         width: 100%;
         border-collapse: collapse;
         font-size: 13px;
+        table-layout: fixed;
       }
       th, td {
         border: 1px solid var(--line);
         padding: 8px;
         text-align: left;
         vertical-align: top;
+        overflow-wrap: anywhere;
+        word-break: break-word;
+        hyphens: auto;
       }
       th {
         background: #f5f8fc;
@@ -404,6 +475,7 @@ def build_sweep_report(
         cursor: default;
       }
       .table-wrap {
+        width: 100%;
         max-height: 520px;
         overflow: auto;
       }
@@ -586,9 +658,43 @@ def build_sweep_report(
                 f'<div class="summary-item"><div class="summary-item__label">module sizes <span class="summary-help" title="Module sizes are target QR module sizes in pixels. The whole dataset is normalized to the first module size, then to each next size, and one combined summary plot is built.">?</span></div><div class="summary-item__value">{escape(x_targets_text)}</div></div>',
                 f'<div class="summary-item"><div class="summary-item__label">Total samples</div><div class="summary-item__value">{total_samples}</div></div>',
                 f'<div class="summary-item"><div class="summary-item__label">GT samples</div><div class="summary-item__value">{gt_samples}</div></div>',
-                f'<div class="summary-item"><div class="summary-item__label">NO GT samples</div><div class="summary-item__value">{no_gt_samples}</div></div>',
                 "</div>",
                 '<div class="explain">P10-P90 band is the percentile range from the 10th to the 90th percentile of decode time; it shows the typical spread without extreme outliers.</div>',
+                "</section>",
+            ]
+        )
+    )
+
+    html_parts.append(
+        "".join(
+            [
+                '<section class="card">',
+                '<h2 style="margin:0 0 10px;">Optimal module size analysis</h2>',
+                '<h3 style="margin:0 0 8px;">Recommended</h3>',
+                '<div class="summary-grid">',
+                f'<div class="summary-item"><div class="summary-item__label">x_target</div><div class="summary-item__value">{recommended_x_target_text}</div></div>',
+                f'<div class="summary-item"><div class="summary-item__label">{quality_label}</div><div class="summary-item__value">{recommended_quality_text}</div></div>',
+                f'<div class="summary-item"><div class="summary-item__label">median time</div><div class="summary-item__value">{recommended_time_text}</div></div>',
+                f'<div class="summary-item"><div class="summary-item__label">time spread p90-p10</div><div class="summary-item__value">{recommended_spread_text}</div></div>',
+                "</div>",
+                '<h3 style="margin:12px 0 8px;">Max Quality</h3>',
+                '<div class="summary-grid">',
+                f'<div class="summary-item"><div class="summary-item__label">x_target</div><div class="summary-item__value">{max_quality_x_target_text}</div></div>',
+                f'<div class="summary-item"><div class="summary-item__label">{quality_label}</div><div class="summary-item__value">{max_quality_quality_text}</div></div>',
+                f'<div class="summary-item"><div class="summary-item__label">median time</div><div class="summary-item__value">{max_quality_time_text}</div></div>',
+                f'<div class="summary-item"><div class="summary-item__label">time spread p90-p10</div><div class="summary-item__value">{max_quality_spread_text}</div></div>',
+                "</div>",
+                "".join(
+                    [
+                        '<div class="explain">',
+                        "Method:<br>",
+                        "1) The beginning of the plateau is chosen by the following rule: ",
+                        f"Quantile(max_quality - &epsilon;), where &epsilon; = {float(optimal_analysis['eps_pp']):.2f} pp.<br>",
+                        "2) Among the values in plateau, Pareto analysis is performed.<br>",
+                        f'Candidates: {candidate_targets_text}.',
+                        "</div>",
+                    ]
+                ),
                 "</section>",
             ]
         )
