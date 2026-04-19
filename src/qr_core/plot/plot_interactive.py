@@ -57,7 +57,7 @@ def _is_no_gt(expected: str | None) -> bool:
 
 
 def _build_baseline_report_html(
-    fig: go.Figure,
+    plot_html: str,
     *,
     report_title: str,
     dataset: str,
@@ -67,9 +67,9 @@ def _build_baseline_report_html(
     total_samples: int,
     gt_samples: int,
     no_gt_samples: int,
+    binned_table_rows_html: str,
+    pareto_table_rows_html: str,
 ) -> str:
-    plot_html = fig.to_html(full_html=False, include_plotlyjs=True)
-
     return """<!doctype html>
 <html lang="en">
   <head>
@@ -124,6 +124,29 @@ def _build_baseline_report_html(
         font-size: 15px;
         font-weight: 600;
       }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 13px;
+        table-layout: fixed;
+      }
+      th, td {
+        border: 1px solid var(--line);
+        padding: 8px;
+        text-align: left;
+        vertical-align: top;
+        overflow-wrap: anywhere;
+        word-break: break-word;
+        hyphens: auto;
+      }
+      th {
+        background: #f5f8fc;
+      }
+      .table-wrap {
+        width: 100%;
+        max-height: 520px;
+        overflow: auto;
+      }
       html.is-embed .baseline-summary-card {
         display: none !important;
       }
@@ -137,7 +160,7 @@ def _build_baseline_report_html(
           <div class="summary-item"><div class="summary-item__label">Dataset</div><div class="summary-item__value">""" + escape(dataset) + """</div></div>
           <div class="summary-item"><div class="summary-item__label">Engine</div><div class="summary-item__value">""" + escape(engine) + """</div></div>
           <div class="summary-item"><div class="summary-item__label">Iterations</div><div class="summary-item__value">""" + str(int(iterations)) + """</div></div>
-          <div class="summary-item"><div class="summary-item__label">Time mode</div><div class="summary-item__value">""" + escape(time_mode) + """</div></div>
+          <!-- <div class="summary-item"><div class="summary-item__label">Time mode</div><div class="summary-item__value">""" + escape(time_mode) + """</div></div> -->
           <div class="summary-item"><div class="summary-item__label">Total samples</div><div class="summary-item__value">""" + str(int(total_samples)) + """</div></div>
           <div class="summary-item"><div class="summary-item__label">GT samples</div><div class="summary-item__value">""" + str(int(gt_samples)) + """</div></div>
           <div class="summary-item"><div class="summary-item__label">NO GT samples</div><div class="summary-item__value">""" + str(int(no_gt_samples)) + """</div></div>
@@ -145,6 +168,43 @@ def _build_baseline_report_html(
       </section>
       <section class="card">
 """ + plot_html + """
+      </section>
+      <section class="card">
+        <h3 style="margin:0 0 10px;">Pareto summary</h3>
+        <div class="table-wrap">
+          <table id="baselineParetoSummary">
+            <thead>
+              <tr>
+                <th>pareto module size</th>
+                <th>samples</th>
+                <th>time min (sec)</th>
+                <th>accuracy mean</th>
+              </tr>
+            </thead>
+            <tbody>
+""" + pareto_table_rows_html + """
+            </tbody>
+          </table>
+        </div>
+      </section>
+      <section class="card">
+        <h3 style="margin:0 0 10px;">Per-target summary</h3>
+        <div class="table-wrap">
+          <table id="baselineTargetSummary">
+            <thead>
+              <tr>
+                <th>module size</th>
+                <th>samples</th>
+                <th>accuracy</th>
+                <th>correct decodes</th>
+                <th>failed decodes</th>
+              </tr>
+            </thead>
+            <tbody>
+""" + binned_table_rows_html + """
+            </tbody>
+          </table>
+        </div>
       </section>
     </div>
     <script>
@@ -177,7 +237,7 @@ def build_interactive_plot(
     bins_sorted = sorted(bin_stats, key=lambda b: b.module_size)
 
     x_time_raw = [float(r.module_size_raw) for r in results_sorted]
-    y_time_raw = [r.time_total_min_sec for r in results_sorted]
+    y_time_raw = [float(r.time_total_min_sec) * 1000.0 for r in results_sorted]
 
     x_acc_bin = [b.module_size for b in bins_sorted]
     tick_step = _infer_tick_step(x_acc_bin) if x_acc_bin else 1
@@ -194,16 +254,15 @@ def build_interactive_plot(
         maximize_keys=("accuracy_mean",),
     )
     x_pareto_bins = [p["module_size"] for p in pareto_front_points]
-    y_pareto_bins = [p["time_min"] for p in pareto_front_points]
+    y_pareto_bins = [float(p["time_min"]) * 1000.0 for p in pareto_front_points]
     pareto_acc = [p["accuracy_mean"] for p in pareto_front_points]
 
     fig = make_subplots(
-        rows=4,
+        rows=2,
         cols=1,
         shared_xaxes=True,
-        vertical_spacing=0.06,
-        row_heights=[0.4, 0.18, 0.27, 0.15],
-        specs=[[{}], [{}], [{"type": "table"}], [{"type": "table"}]],
+        vertical_spacing=0.12,
+        row_heights=[0.68, 0.32],
     )
 
     fig.add_trace(
@@ -211,10 +270,10 @@ def build_interactive_plot(
             x=x_time_raw,
             y=y_time_raw,
             mode="markers",
-            name="Time total min",
+            name="Time",
             marker=dict(size=6, color="#1f77b4", opacity=0.6),
             customdata=[r.image_path for r in results_sorted],
-            hovertemplate="module_size_raw=%{x:.3f}<br>time=%{y:.6f}s<extra></extra>",
+            hovertemplate="module_size_raw=%{x:.3f}<br>time=%{y:.3f} ms<extra></extra>",
         ),
         row=1,
         col=1,
@@ -228,7 +287,7 @@ def build_interactive_plot(
             mode="lines",
             name="Time trend",
             line=dict(color="#1f77b4", width=2, shape="spline"),
-            hovertemplate="module_size_raw=%{x:.3f}<br>smoothed_time=%{y:.6f}s<extra></extra>",
+            hovertemplate="module_size_raw=%{x:.3f}<br>smoothed_time=%{y:.3f} ms<extra></extra>",
         ),
         row=1,
         col=1,
@@ -243,7 +302,7 @@ def build_interactive_plot(
                 name="Pareto bins",
                 marker=dict(size=10, color="#ff7f0e", symbol="diamond", line=dict(width=1)),
                 customdata=pareto_acc,
-                hovertemplate="module_size_bin=%{x:.0f}<br>time_min=%{y:.6f}s<br>accuracy_mean=%{customdata:.3f}<extra></extra>",
+                hovertemplate="module_size_bin=%{x:.0f}<br>time_min=%{y:.3f} ms<br>accuracy_mean=%{customdata:.3f}<extra></extra>",
             ),
             row=1,
             col=1,
@@ -273,73 +332,6 @@ def build_interactive_plot(
         col=1,
     )
 
-    fig.add_trace(
-        go.Table(
-            header=dict(
-                values=[
-                    "Module size px (binned)",
-                    "Images (count)",
-                    "Mean accuracy (%)",
-                    "Correct decodes (count)",
-                    "Failed decodes (count)",
-                ],
-                fill_color="#f0f0f0",
-                align="left",
-                font=dict(size=13),
-                height=28,
-            ),
-            cells=dict(
-                values=[
-                    x_acc_bin,
-                    [b.count for b in bins_sorted],
-                    [f"{b.mean_accuracy * 100:.2f}" for b in bins_sorted],
-                    y_count_acc1,
-                    y_count_acc0,
-                ],
-                align="left",
-                font=dict(size=13),
-                height=28,
-            ),
-        ),
-        row=3,
-        col=1,
-    )
-
-    if pareto_front_points:
-        pareto_values = [
-            [f"{p['module_size']:.0f}" for p in pareto_front_points],
-            [f"{p['n']:.0f}" for p in pareto_front_points],
-            [f"{p['time_min']:.6f}" for p in pareto_front_points],
-            [f"{p['accuracy_mean']:.3f}" for p in pareto_front_points],
-        ]
-    else:
-        pareto_values = [[], [], [], []]
-
-    fig.add_trace(
-        go.Table(
-            header=dict(
-                values=[
-                    "Pareto module size",
-                    "Images (count)",
-                    "Time min (sec)",
-                    "Accuracy mean",
-                ],
-                fill_color="#f0f0f0",
-                align="left",
-                font=dict(size=13),
-                height=28,
-            ),
-            cells=dict(
-                values=pareto_values,
-                align="left",
-                font=dict(size=13),
-                height=28,
-            ),
-        ),
-        row=4,
-        col=1,
-    )
-
     max_time = max(y_time_raw, default=0.0)
     max_count = max(y_count_acc1 + y_count_acc0, default=0)
     max_x = max(
@@ -350,21 +342,9 @@ def build_interactive_plot(
         title=title or "QR decoding vs module size",
         barmode="stack",
         hovermode="closest",
-        height=1250,
+        height=860,
         legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="left", x=0),
-        annotations=[
-            dict(
-                text=f"Time: raw module size. Accuracy: binned (step = {bin_step_px}px).",
-                x=0.5,
-                y=0.98,
-                xref="paper",
-                yref="paper",
-                showarrow=False,
-                xanchor="center",
-                yanchor="top",
-                font=dict(size=11, color="#6b7280"),
-            )
-        ],
+        
     )
 
     x_label = "Module size (px)"
@@ -393,13 +373,15 @@ def build_interactive_plot(
         col=1,
     )
 
-    fig.update_yaxes(title_text="Time total min (sec)", row=1, col=1)
+    fig.update_yaxes(title_text="Time (ms)", row=1, col=1)
     fig.update_yaxes(title_text="Count", row=2, col=1)
 
     time_upper = max_time * 1.05 if max_time > 0 else 1.0
-    fig.update_yaxes(range=[0, time_upper], row=1, col=1)
+    # Slightly extend below zero so near-zero points are visible above the x-axis.
+    time_lower = -max(0.5, time_upper * 0.03)
+    fig.update_yaxes(range=[time_lower, time_upper], row=1, col=1)
 
-    count_upper = max_count * 1.05 if max_count > 0 else 1.0
+    count_upper = max_count * 1.15 if max_count > 0 else 1.0
     fig.update_yaxes(range=[0, count_upper], row=2, col=1)
 
     first = results_sorted[0]
@@ -414,8 +396,45 @@ def build_interactive_plot(
 
     report_title = f"QR baseline run ({dataset}, {engine})"
 
+    binned_table_rows: list[str] = []
+    for b in bins_sorted:
+        binned_table_rows.append(
+            "".join(
+                [
+                    "<tr>",
+                    f"<td>{int(b.module_size)}</td>",
+                    f"<td>{int(b.count)}</td>",
+                    f"<td>{float(b.mean_accuracy * 100.0):.2f}%</td>",
+                    f"<td>{int(b.count_acc1)}</td>",
+                    f"<td>{int(b.count_acc0)}</td>",
+                    "</tr>",
+                ]
+            )
+        )
+    if not binned_table_rows:
+        binned_table_rows.append('<tr><td colspan="5">No data.</td></tr>')
+
+    pareto_table_rows: list[str] = []
+    for p in pareto_front_points:
+        pareto_table_rows.append(
+            "".join(
+                [
+                    "<tr>",
+                    f"<td>{float(p['module_size']):.0f}</td>",
+                    f"<td>{float(p['n']):.0f}</td>",
+                    f"<td>{float(p['time_min']):.6f}</td>",
+                    f"<td>{float(p['accuracy_mean']):.3f}</td>",
+                    "</tr>",
+                ]
+            )
+        )
+    if not pareto_table_rows:
+        pareto_table_rows.append('<tr><td colspan="4">No Pareto points.</td></tr>')
+
+    plot_html = fig.to_html(full_html=False, include_plotlyjs=True)
+
     html = _build_baseline_report_html(
-        fig,
+        plot_html,
         report_title=report_title,
         dataset=dataset,
         engine=engine,
@@ -424,6 +443,8 @@ def build_interactive_plot(
         total_samples=total_samples,
         gt_samples=gt_samples,
         no_gt_samples=no_gt_samples,
+        binned_table_rows_html="".join(binned_table_rows),
+        pareto_table_rows_html="".join(pareto_table_rows),
     )
 
     output_html.parent.mkdir(parents=True, exist_ok=True)
