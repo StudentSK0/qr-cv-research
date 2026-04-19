@@ -66,7 +66,6 @@ def _build_target_stats(results: Sequence[NormalizedSampleResult]) -> list[dict[
                 "time_median_ms": float(median(times)) if times else 0.0,
                 "time_p10_ms": time_p10,
                 "time_p90_ms": time_p90,
-                "time_p95_ms": _percentile(times, 95.0),
                 "spread_ms": max(0.0, float(time_p90) - float(time_p10)),
             }
         )
@@ -88,10 +87,7 @@ def _build_plot_html(target_stats: Sequence[dict[str, Any]], title: str) -> str:
         shared_xaxes=True,
         vertical_spacing=0.13,
         row_heights=[0.60, 0.40],
-        subplot_titles=(
-            "Decode time by normalized module size target",
-            "Decode success rate by normalized module size target",
-        ),
+
     )
 
     fig.add_trace(
@@ -126,7 +122,7 @@ def _build_plot_html(target_stats: Sequence[dict[str, Any]], title: str) -> str:
             x=x,
             y=y_time_median,
             mode="lines+markers",
-            name="Median decode time",
+            name="Median time",
             line=dict(color="#2563eb", width=2),
             marker=dict(size=8),
             hovertemplate="x_target=%{x:g}px<br>median=%{y:.3f} ms<extra></extra>",
@@ -139,7 +135,7 @@ def _build_plot_html(target_stats: Sequence[dict[str, Any]], title: str) -> str:
             x=x,
             y=y_time_mean,
             mode="lines+markers",
-            name="Mean decode time",
+            name="Mean time",
             line=dict(color="#f59e0b", width=2),
             marker=dict(size=7),
             hovertemplate="x_target=%{x:g}px<br>mean=%{y:.3f} ms<extra></extra>",
@@ -153,7 +149,7 @@ def _build_plot_html(target_stats: Sequence[dict[str, Any]], title: str) -> str:
             x=x,
             y=y_success,
             mode="lines+markers",
-            name="Decode success rate",
+            name="Accuracy",
             line=dict(color="#7c3aed", width=2),
             marker=dict(size=8),
             hovertemplate="x_target=%{x:g}px<br>success=%{y:.2f}%<extra></extra>",
@@ -177,10 +173,10 @@ def _build_plot_html(target_stats: Sequence[dict[str, Any]], title: str) -> str:
         ),
         margin=dict(l=54, r=24, t=150, b=56),
     )
-    fig.update_yaxes(title_text="Decode time (ms)", row=1, col=1)
-    fig.update_yaxes(title_text="Success rate (%)", range=[0, 100], row=2, col=1)
-    fig.update_xaxes(showticklabels=True, row=1, col=1)
-    fig.update_xaxes(title_text="x_target (px)", row=2, col=1)
+    fig.update_yaxes(title_text="Time (ms)", row=1, col=1)
+    fig.update_yaxes(title_text="Accuracy (%)", range=[-10, 110], row=2, col=1)
+    fig.update_xaxes(title_text="Module size (px)", showticklabels=True, row=1, col=1)
+    fig.update_xaxes(title_text="Module size (px)", row=2, col=1)
 
     return fig.to_html(full_html=False, include_plotlyjs=True)
 
@@ -206,6 +202,9 @@ def build_sweep_report(
     total_samples = len(sorted_results)
     no_gt_samples = sum(1 for item in sorted_results if _is_no_gt(item.expected))
     gt_samples = total_samples - no_gt_samples
+    total_skipped_no_markup = sum(
+        int(getattr(row, "skipped_no_markup", 0)) for row in summary.targets
+    )
 
     summary_by_target: dict[float, Any] = {
         float(row.x_target): row for row in summary.targets
@@ -278,11 +277,6 @@ def build_sweep_report(
         x_target = float(row["x_target"])
         target_info = summary_by_target.get(x_target)
 
-        processed = int(getattr(target_info, "processed", row["count"]))
-        skipped_no_markup = int(getattr(target_info, "skipped_no_markup", 0))
-        skipped_bad_module = int(getattr(target_info, "skipped_bad_module", 0))
-        skipped_image_read = int(getattr(target_info, "skipped_image_read", 0))
-
         target_summary_rows.append(
             "".join(
                 [
@@ -293,13 +287,8 @@ def build_sweep_report(
                     f"<td>{row['time_median_ms']:.3f}</td>",
                     f"<td>{row['time_mean_ms']:.3f}</td>",
                     f"<td>{row['time_p90_ms']:.3f}</td>",
-                    f"<td>{row['time_p95_ms']:.3f}</td>",
+                    f"<td>{row['time_p10_ms']:.3f}</td>",
                     f"<td>{int(row['gt_count'])}</td>",
-                    f"<td>{int(row['no_gt_count'])}</td>",
-                    f"<td>{processed}</td>",
-                    f"<td>{skipped_no_markup}</td>",
-                    f"<td>{skipped_bad_module}</td>",
-                    f"<td>{skipped_image_read}</td>",
                     "</tr>",
                 ]
             )
@@ -353,7 +342,6 @@ def build_sweep_report(
         expected_display = "N/A (no ground-truth)" if no_gt else _truncate(expected_text)
         accuracy_display = "n/a" if accuracy_value is None else f"{float(accuracy_value):.3f}"
         no_gt_badge = '<span class="no-gt-badge">NO GT</span>' if no_gt else ""
-        success_display = "yes" if item.decode_success else "no"
 
         table_rows.append(
             "".join(
@@ -366,7 +354,6 @@ def build_sweep_report(
                     f'<td data-value="{float(item.scale_factor):.8f}">{float(item.scale_factor):.3f}</td>',
                     f'<td data-value="{int(item.resized_width) * int(item.resized_height)}">{int(item.resized_width)} x {int(item.resized_height)}</td>',
                     f'<td data-value="{float(item.decode_time_ms):.8f}">{float(item.decode_time_ms):.3f}</td>',
-                    f'<td data-value="{1 if item.decode_success else 0}">{success_display}</td>',
                     f'<td data-value="{accuracy_value if accuracy_value is not None else -1}">{accuracy_display}</td>',
                     f'<td data-value="{escape(decoded_text)}">{escape(_truncate(decoded_text) or "N/A")}</td>',
                     f'<td data-value="{escape(expected_text)}">{escape(expected_display)} {no_gt_badge}</td>',
@@ -654,12 +641,12 @@ def build_sweep_report(
                 f'<div class="summary-item"><div class="summary-item__label">Dataset</div><div class="summary-item__value">{escape(dataset)}</div></div>',
                 f'<div class="summary-item"><div class="summary-item__label">Engine</div><div class="summary-item__value">{escape(engine)}</div></div>',
                 f'<div class="summary-item"><div class="summary-item__label">Iterations</div><div class="summary-item__value">{int(iterations)}</div></div>',
-                f'<div class="summary-item"><div class="summary-item__label">Time mode</div><div class="summary-item__value">{escape(time_mode)}</div></div>',
                 f'<div class="summary-item"><div class="summary-item__label">module sizes <span class="summary-help" title="Module sizes are target QR module sizes in pixels. The whole dataset is normalized to the first module size, then to each next size, and one combined summary plot is built.">?</span></div><div class="summary-item__value">{escape(x_targets_text)}</div></div>',
                 f'<div class="summary-item"><div class="summary-item__label">Total samples</div><div class="summary-item__value">{total_samples}</div></div>',
                 f'<div class="summary-item"><div class="summary-item__label">GT samples</div><div class="summary-item__value">{gt_samples}</div></div>',
+                f'<div class="summary-item"><div class="summary-item__label">skip no markup</div><div class="summary-item__value">{total_skipped_no_markup}</div></div>',
                 "</div>",
-                '<div class="explain">P10-P90 band is the percentile range from the 10th to the 90th percentile of decode time; it shows the typical spread without extreme outliers.</div>',
+                '<div class="explain">P10-P90 band is the percentile range from the 10th to the 90th percentile of decode time. It shows the typical spread without extreme outliers.</div>',
                 "</section>",
             ]
         )
@@ -672,15 +659,15 @@ def build_sweep_report(
                 '<h2 style="margin:0 0 10px;">Optimal module size analysis</h2>',
                 '<h3 style="margin:0 0 8px;">Recommended</h3>',
                 '<div class="summary-grid">',
-                f'<div class="summary-item"><div class="summary-item__label">x_target</div><div class="summary-item__value">{recommended_x_target_text}</div></div>',
-                f'<div class="summary-item"><div class="summary-item__label">{quality_label}</div><div class="summary-item__value">{recommended_quality_text}</div></div>',
+                f'<div class="summary-item"><div class="summary-item__label">module size</div><div class="summary-item__value">{recommended_x_target_text}</div></div>',
+                f'<div class="summary-item"><div class="summary-item__label">accuracy</div><div class="summary-item__value">{recommended_quality_text}</div></div>',
                 f'<div class="summary-item"><div class="summary-item__label">median time</div><div class="summary-item__value">{recommended_time_text}</div></div>',
                 f'<div class="summary-item"><div class="summary-item__label">time spread p90-p10</div><div class="summary-item__value">{recommended_spread_text}</div></div>',
                 "</div>",
-                '<h3 style="margin:12px 0 8px;">Max Quality</h3>',
+                '<h3 style="margin:12px 0 8px;">Max Accuracy</h3>',
                 '<div class="summary-grid">',
-                f'<div class="summary-item"><div class="summary-item__label">x_target</div><div class="summary-item__value">{max_quality_x_target_text}</div></div>',
-                f'<div class="summary-item"><div class="summary-item__label">{quality_label}</div><div class="summary-item__value">{max_quality_quality_text}</div></div>',
+                f'<div class="summary-item"><div class="summary-item__label">module size</div><div class="summary-item__value">{max_quality_x_target_text}</div></div>',
+                f'<div class="summary-item"><div class="summary-item__label">accuracy</div><div class="summary-item__value">{max_quality_quality_text}</div></div>',
                 f'<div class="summary-item"><div class="summary-item__label">median time</div><div class="summary-item__value">{max_quality_time_text}</div></div>',
                 f'<div class="summary-item"><div class="summary-item__label">time spread p90-p10</div><div class="summary-item__value">{max_quality_spread_text}</div></div>',
                 "</div>",
@@ -688,9 +675,9 @@ def build_sweep_report(
                     [
                         '<div class="explain">',
                         "Method:<br>",
-                        "1) The beginning of the plateau is chosen by the following rule: ",
-                        f"Quantile(max_quality - &epsilon;), where &epsilon; = {float(optimal_analysis['eps_pp']):.2f} pp.<br>",
-                        "2) Among the values in plateau, Pareto analysis is performed.<br>",
+                        "1) Finding the beginning of plateau at the accuracy plot by the following rule: ",
+                        f"max_accuracy - &epsilon;, where &epsilon; = {float(optimal_analysis['eps_pp']):.2f} pp.<br>",
+                        "2) Perfoming Pareto analysis among the values in the plateau.<br>",
                         f'Candidates: {candidate_targets_text}.',
                         "</div>",
                     ]
@@ -712,7 +699,7 @@ def build_sweep_report(
                 '<div class="table-wrap">',
                 '<table id="targetSummary">',
                 '<thead><tr>',
-                '<th>x_target</th><th>samples</th><th>success</th><th>median ms</th><th>mean ms</th><th>p90 ms</th><th>p95 ms</th><th>GT</th><th>NO GT</th><th>processed</th><th>skip no markup</th><th>skip bad module</th><th>skip image read</th>',
+                '<th>module size</th><th>samples</th><th>accuracy</th><th>median ms</th><th>mean ms</th><th>p90 ms</th><th>p10 ms</th><th>GT</th>',
                 '</tr></thead>',
                 '<tbody>',
                 ''.join(target_summary_rows),
@@ -730,20 +717,19 @@ def build_sweep_report(
                 '<section class="card">',
                 '<h2 style="margin:0 0 10px;">Per-image results</h2>',
                 '<div class="toolbar">',
-                '<input id="sampleSearch" type="search" placeholder="Search image_path / decoded / expected...">',
+                '<input id="sampleSearch" type="search" placeholder="Search image path / decoded / expected...">',
                 '<span class="small">Click headers to sort. Accuracy = gt_accuracy for GT samples and decode_success_rate for NO GT samples.</span>',
                 '</div>',
                 '<div class="table-wrap">',
                 '<table id="samplesTable">',
                 '<thead><tr>',
                 '<th data-type="number">#</th>',
-                '<th data-type="text">image_path</th>',
-                '<th data-type="number">x_target</th>',
-                '<th data-type="number">module_size_px_current</th>',
-                '<th data-type="number">scale_factor</th>',
+                '<th data-type="text">image path</th>',
+                '<th data-type="number">module size px</th>',
+                '<th data-type="number">initial module size px</th>',
+                '<th data-type="number">scale factor</th>',
                 '<th data-type="text">resized</th>',
-                '<th data-type="number">decode_time_ms</th>',
-                '<th data-type="text">decode_success</th>',
+                '<th data-type="number">time ms</th>',
                 '<th data-type="number">accuracy</th>',
                 '<th data-type="text">decoded</th>',
                 '<th data-type="text">expected</th>',

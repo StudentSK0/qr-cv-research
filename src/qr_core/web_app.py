@@ -1466,7 +1466,7 @@ RESULT_TEMPLATE = """<!doctype html>
           <span class="meta__item">Engine: <strong>{{ engine }}</strong></span>
           <span class="meta__item">Mode: <strong>{{ mode_label }}</strong></span>
           <span class="meta__item">Iterations: <strong>{{ iterations }}</strong></span>
-          <span class="meta__item">Time mode: <strong>{{ time_mode }}</strong></span>
+          <!-- <span class="meta__item">Time mode: <strong>{{ time_mode }}</strong></span> -->
           {% if job_type == 'sweep' and x_targets_text %}
           <span class="meta__item">module sizes: <strong>{{ x_targets_text }}</strong>
             <span class="tip" tabindex="0" data-tip="Module sizes are target QR module sizes in pixels. The whole dataset is normalized to the first module size, then to each next size, and one combined summary plot is built.">?</span>
@@ -1475,13 +1475,13 @@ RESULT_TEMPLATE = """<!doctype html>
         </div>
         <div class="summary">
           <div>processed: {{ processed }}</div>
-          <div>skipped_no_markup: {{ skipped_no_markup }}
+          <div>skipped no markup: {{ skipped_no_markup }}
             <span class="tip" tabindex="0" data-tip="Images skipped because markup JSON is missing or unreadable.">?</span>
           </div>
           <div>GT samples: {{ gt_samples }}
             <span class="tip" tabindex="0" data-tip="Images that have a non-empty expected value (Ground Truth) in markup and can be compared against decoded output.">?</span>
           </div>
-          <div>NO GT samples: {{ no_gt_samples }}</div>
+          <!-- <div>NO GT samples: {{ no_gt_samples }}</div> -->
         </div>
         <div class="links">
           <a href="{{ plot_url }}" target="_blank" rel="noopener">Open plot</a>
