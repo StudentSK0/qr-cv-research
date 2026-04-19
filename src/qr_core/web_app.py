@@ -2338,8 +2338,8 @@ def create_app(project_root: Path | None = None) -> Flask:
         run_mode: str = "baseline",
         x_targets_value: str = "2,3,4,6,8,10",
         selected_engine: str | None = None,
-        iterations_value: int = 3,
-        bin_step_value: int = 2,
+        iterations_value: int = 1,
+        bin_step_value: int = 1,
     ) -> str:
         engines = list(ENGINE_REGISTRY.keys())
         local_error = error
@@ -2376,8 +2376,8 @@ def create_app(project_root: Path | None = None) -> Flask:
 
     @app.post("/run")
     def run_experiment_route() -> str:
-        iterations = _parse_positive_int(request.form.get("iterations"), default=3)
-        bin_step_px = _parse_positive_int(request.form.get("bin_step_px"), default=2)
+        iterations = _parse_positive_int(request.form.get("iterations"), default=1)
+        bin_step_px = _parse_positive_int(request.form.get("bin_step_px"), default=1)
         engine_key = request.form.get("engine", "")
         run_mode = _parse_run_mode(request.form.get("run_mode"))
         x_targets_raw = (request.form.get("x_targets") or "").strip()

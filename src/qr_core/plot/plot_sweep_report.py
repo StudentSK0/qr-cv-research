@@ -47,12 +47,12 @@ def _build_target_stats(results: Sequence[NormalizedSampleResult]) -> list[dict[
     for x_target in sorted(grouped):
         rows = grouped[x_target]
         times = [float(r.decode_time_ms) for r in rows]
-        success = [1.0 if bool(r.decode_success) else 0.0 for r in rows]
         accuracies = [float(r.accuracy) for r in rows]
         no_gt_count = sum(1 for r in rows if _is_no_gt(r.expected))
         gt_count = len(rows) - no_gt_count
         time_p10 = _percentile(times, 10.0)
         time_p90 = _percentile(times, 90.0)
+        accuracy_rate = float(mean(accuracies) * 100.0) if accuracies else 0.0
 
         stats.append(
             {
@@ -60,8 +60,10 @@ def _build_target_stats(results: Sequence[NormalizedSampleResult]) -> list[dict[
                 "count": len(rows),
                 "gt_count": gt_count,
                 "no_gt_count": no_gt_count,
-                "success_rate": float(mean(success) * 100.0) if success else 0.0,
-                "accuracy_rate": float(mean(accuracies) * 100.0) if accuracies else 0.0,
+                # keep alias for backward compatibility in helper code paths;
+                # reporting/selection use accuracy_rate as the single metric.
+                "success_rate": float(accuracy_rate),
+                "accuracy_rate": float(accuracy_rate),
                 "time_mean_ms": float(mean(times)) if times else 0.0,
                 "time_median_ms": float(median(times)) if times else 0.0,
                 "time_p10_ms": time_p10,
@@ -79,7 +81,7 @@ def _build_plot_html(target_stats: Sequence[dict[str, Any]], title: str) -> str:
     y_time_mean = [row["time_mean_ms"] for row in target_stats]
     y_time_p10 = [row["time_p10_ms"] for row in target_stats]
     y_time_p90 = [row["time_p90_ms"] for row in target_stats]
-    y_success = [row["success_rate"] for row in target_stats]
+    y_accuracy = [row["accuracy_rate"] for row in target_stats]
 
     fig = make_subplots(
         rows=2,
@@ -112,7 +114,7 @@ def _build_plot_html(target_stats: Sequence[dict[str, Any]], title: str) -> str:
             line=dict(width=0),
             fill="tonexty",
             fillcolor="rgba(14, 165, 233, 0.14)",
-            hovertemplate="x_target=%{x:g}px<br>p10=%{y:.3f} ms<extra></extra>",
+            hovertemplate="module size=%{x:.0f}px<br>p10=%{y:.3f} ms<extra></extra>",
         ),
         row=1,
         col=1,
@@ -125,7 +127,7 @@ def _build_plot_html(target_stats: Sequence[dict[str, Any]], title: str) -> str:
             name="Median time",
             line=dict(color="#2563eb", width=2),
             marker=dict(size=8),
-            hovertemplate="x_target=%{x:g}px<br>median=%{y:.3f} ms<extra></extra>",
+            hovertemplate="module size=%{x:.0f}px<br>median=%{y:.3f} ms<extra></extra>",
         ),
         row=1,
         col=1,
@@ -138,7 +140,7 @@ def _build_plot_html(target_stats: Sequence[dict[str, Any]], title: str) -> str:
             name="Mean time",
             line=dict(color="#f59e0b", width=2),
             marker=dict(size=7),
-            hovertemplate="x_target=%{x:g}px<br>mean=%{y:.3f} ms<extra></extra>",
+            hovertemplate="module size=%{x:.0f}px<br>mean=%{y:.3f} ms<extra></extra>",
         ),
         row=1,
         col=1,
@@ -147,12 +149,12 @@ def _build_plot_html(target_stats: Sequence[dict[str, Any]], title: str) -> str:
     fig.add_trace(
         go.Scatter(
             x=x,
-            y=y_success,
+            y=y_accuracy,
             mode="lines+markers",
             name="Accuracy",
             line=dict(color="#7c3aed", width=2),
             marker=dict(size=8),
-            hovertemplate="x_target=%{x:g}px<br>success=%{y:.2f}%<extra></extra>",
+            hovertemplate="module size=%{x:.0f}px<br>accuracy=%{y:.2f}%<extra></extra>",
         ),
         row=2,
         col=1,
@@ -218,9 +220,6 @@ def build_sweep_report(
         use_pareto_prefilter=True,
     )
     recommended = optimal_analysis.get("recommended")
-    quality_metric = str(optimal_analysis.get("quality_metric") or "success_rate")
-    quality_label = "accuracy" if quality_metric == "accuracy_rate" else "decode success"
-
     def _format_x_targets(items: Sequence[dict[str, Any]]) -> str:
         if not items:
             return "n/a"
@@ -233,7 +232,7 @@ def build_sweep_report(
 
     if isinstance(recommended, dict):
         recommended_x_target_text = f"{float(recommended['x_target']):g} px"
-        recommended_quality_text = f"{float(recommended[quality_metric]):.2f}%"
+        recommended_quality_text = f"{float(recommended['accuracy_rate']):.2f}%"
         recommended_time_text = f"{float(recommended['time_median_ms']):.3f} ms"
         recommended_spread_text = f"{float(recommended['spread_ms']):.3f} ms"
     else:
@@ -254,7 +253,7 @@ def build_sweep_report(
         max_quality_point = max(
             target_stats,
             key=lambda row: (
-                _safe_float(row.get(quality_metric), 0.0),
+                _safe_float(row.get("accuracy_rate"), 0.0),
                 -_safe_float(row.get("time_median_ms"), float("inf")),
                 -_safe_float(row.get("spread_ms"), float("inf")),
                 -_safe_float(row.get("x_target"), float("inf")),
@@ -263,7 +262,7 @@ def build_sweep_report(
 
     if max_quality_point is not None:
         max_quality_x_target_text = f"{_safe_float(max_quality_point.get('x_target')):g} px"
-        max_quality_quality_text = f"{_safe_float(max_quality_point.get(quality_metric)):.2f}%"
+        max_quality_quality_text = f"{_safe_float(max_quality_point.get('accuracy_rate')):.2f}%"
         max_quality_time_text = f"{_safe_float(max_quality_point.get('time_median_ms')):.3f} ms"
         max_quality_spread_text = f"{_safe_float(max_quality_point.get('spread_ms')):.3f} ms"
     else:
@@ -283,7 +282,7 @@ def build_sweep_report(
                     "<tr>",
                     f"<td>{x_target:g}</td>",
                     f"<td>{int(row['count'])}</td>",
-                    f"<td>{row['success_rate']:.2f}%</td>",
+                    f"<td>{row['accuracy_rate']:.2f}%</td>",
                     f"<td>{row['time_median_ms']:.3f}</td>",
                     f"<td>{row['time_mean_ms']:.3f}</td>",
                     f"<td>{row['time_p90_ms']:.3f}</td>",
@@ -562,6 +561,19 @@ def build_sweep_report(
         color: #334155;
         margin-top: 10px;
       }
+      .modal__actions {
+        margin-top: 10px;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+      }
+      .modal__run-result {
+        font-size: 12px;
+        color: #334155;
+        line-height: 1.35;
+        white-space: pre-line;
+      }
       .sample-list {
         list-style: none;
         margin: 0;
@@ -718,7 +730,7 @@ def build_sweep_report(
                 '<h2 style="margin:0 0 10px;">Per-image results</h2>',
                 '<div class="toolbar">',
                 '<input id="sampleSearch" type="search" placeholder="Search image path / decoded / expected...">',
-                '<span class="small">Click headers to sort. Accuracy = gt_accuracy for GT samples and decode_success_rate for NO GT samples.</span>',
+                '<span class="small">Click headers to sort. Accuracy per image: with GT -> decoded == expected; without GT -> non-empty decode.</span>',
                 '</div>',
                 '<div class="table-wrap">',
                 '<table id="samplesTable">',
@@ -758,6 +770,10 @@ def build_sweep_report(
             <div><strong>decoded</strong>: <span id="detailsDecoded"></span></div>
             <div style="margin-top:6px;"><strong>expected (if provided)</strong>: <span id="detailsExpected"></span></div>
             <div id="detailsNoGt" class="modal__note" style="display:none;">Ground-truth is not provided for this image. Accuracy is reported as decode_success_rate.</div>
+            <div id="detailsActions" class="modal__actions">
+              <button id="detailsRunBtn" class="details-btn" type="button">Run on this image</button>
+              <div id="detailsRunResult" class="modal__run-result"></div>
+            </div>
             <div style="margin-top:10px;"><img id="detailsImage" alt="sample" style="max-width:100%; max-height:320px; border:1px solid var(--line); border-radius:10px; display:none;"></div>
           </div>
         </div>
@@ -809,8 +825,12 @@ function setModalOpen(modalEl, isOpen) {
 
 const detailsModal = byId("detailsModal");
 const detailsClose = byId("detailsClose");
+const detailsRunBtn = byId("detailsRunBtn");
+const detailsRunResult = byId("detailsRunResult");
+const detailsActions = byId("detailsActions");
 const drilldownModal = byId("drilldownModal");
 const drilldownClose = byId("drilldownClose");
+let detailsRunContext = null;
 
 if (detailsClose) {
   detailsClose.addEventListener("click", () => setModalOpen(detailsModal, false));
@@ -830,6 +850,23 @@ if (drilldownModal) {
     if (event.target === drilldownModal) {
       setModalOpen(drilldownModal, false);
     }
+  });
+}
+
+if (detailsRunBtn) {
+  detailsRunBtn.addEventListener("click", () => {
+    if (!detailsRunContext) {
+      if (detailsRunResult) {
+        detailsRunResult.textContent = "No sample selected.";
+      }
+      return;
+    }
+    runSingleSample(
+      detailsRunContext.imagePath,
+      detailsRunContext.xTarget,
+      detailsRunBtn,
+      detailsRunResult,
+    );
   });
 }
 
@@ -930,12 +967,26 @@ async function openSampleDetails(index) {
 
   const imgEl = byId("detailsImage");
   const normalized = normalizeImagePath(sample.image_path);
+  const pathToRun = normalized || String(sample.image_path || "");
+  const xTargetToRun = Number(sample.x_target);
   if (imgEl && normalized) {
     const imgUrl = `/api/datasets/${encodeURIComponent(SWEEP_DATASET)}/image?path=${encodeURIComponent(normalized)}`;
     imgEl.src = imgUrl;
     imgEl.style.display = "block";
   } else if (imgEl) {
     imgEl.style.display = "none";
+  }
+
+  if (detailsActions) {
+    detailsActions.style.display = jobId ? "" : "none";
+  }
+  if (detailsRunResult) {
+    detailsRunResult.textContent = "";
+  }
+  if (jobId && pathToRun && Number.isFinite(xTargetToRun)) {
+    detailsRunContext = { imagePath: pathToRun, xTarget: xTargetToRun };
+  } else {
+    detailsRunContext = null;
   }
 
   setModalOpen(detailsModal, true);
@@ -1095,7 +1146,7 @@ async function openTargetSamples(xTarget) {
   const list = byId("drilldownList");
   if (!title || !status || !list) return;
 
-  title.textContent = `Samples for x_target=${Number(xTarget).toString()} px`;
+  title.textContent = `Samples for module size=${Number(xTarget).toString()} px`;
   status.textContent = "Loading...";
   list.innerHTML = "";
   setModalOpen(drilldownModal, true);
@@ -1129,7 +1180,7 @@ function attachPlotClickHandler() {
     const point = event && event.points && event.points[0];
     if (!point) return;
     const traceName = String((point.data && point.data.name) || "").toLowerCase();
-    if (traceName.includes("time") || traceName.includes("success")) {
+    if (traceName.includes("time") || traceName.includes("success") || traceName.includes("accuracy")) {
       const xTarget = Number(point.x);
       if (Number.isFinite(xTarget)) {
         openTargetSamples(xTarget);

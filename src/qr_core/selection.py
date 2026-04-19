@@ -24,7 +24,7 @@ def select_optimal_sweep_target(
     points = _normalize_target_points(target_stats)
     if not points:
         return {
-            "quality_metric": "success_rate",
+            "quality_metric": "accuracy_rate",
             "quality_max": 0.0,
             "plateau_threshold": 0.0,
             "eps_pp": float(max(0.0, eps_pp)),
@@ -103,9 +103,7 @@ def select_optimal_sweep_target(
 def _resolve_quality_key(target_stats: Sequence[dict[str, Any]], preferred: str | None) -> str:
     if preferred in {"accuracy_rate", "success_rate"}:
         return str(preferred)
-
-    has_gt = any(_as_float(row.get("gt_count")) > 0.0 for row in target_stats)
-    return "accuracy_rate" if has_gt else "success_rate"
+    return "accuracy_rate"
 
 
 def _normalize_target_points(target_stats: Sequence[dict[str, Any]]) -> list[dict[str, float]]:
@@ -147,4 +145,3 @@ def _as_float(value: Any) -> float:
     except (TypeError, ValueError):
         return float("nan")
     return result
-
