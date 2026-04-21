@@ -1656,12 +1656,16 @@ RESULT_TEMPLATE = """<!doctype html>
         }
 
         async function fetchSamples(binValue, outcome) {
-          title.textContent = `Samples: bin ${binValue} / ${outcome}`;
+          const normalizedOutcome = (outcome || "all").toLowerCase();
+          title.textContent = normalizedOutcome === "all"
+            ? `Samples for module size=${binValue} px`
+            : `Samples: bin ${binValue} / ${normalizedOutcome}`;
           status.textContent = "Loading...";
           list.innerHTML = "";
           openModal();
           try {
-            const resp = await fetch(`/api/jobs/${jobId}/samples?bin=${encodeURIComponent(binValue)}&outcome=${encodeURIComponent(outcome)}`);
+            const query = `/api/jobs/${jobId}/samples?bin=${encodeURIComponent(binValue)}&outcome=${encodeURIComponent(normalizedOutcome)}`;
+            const resp = await fetch(query);
             const raw = await resp.text();
             let data = null;
             try {
@@ -1735,7 +1739,8 @@ RESULT_TEMPLATE = """<!doctype html>
                   outcome = "correct";
                 }
                 if (!outcome) {
-                  if (traceName.includes("time total min")) {
+                  const isTimeTrace = traceName === "time" || traceName.includes("time total min");
+                  if (isTimeTrace) {
                     const imagePath = normalizeImagePath(point.customdata);
                     if (!imagePath) {
                       return;
@@ -1752,6 +1757,25 @@ RESULT_TEMPLATE = """<!doctype html>
                 }
                 fetchSamples(binValue, outcome);
               });
+              const targetTable = doc.getElementById("baselineTargetSummary");
+              if (targetTable && !targetTable.dataset.drilldownBound) {
+                targetTable.dataset.drilldownBound = "1";
+                targetTable.addEventListener("click", (event) => {
+                  const target = event.target;
+                  if (!target || typeof target.closest !== "function") {
+                    return;
+                  }
+                  const detailsButton = target.closest("button.baseline-details-btn[data-bin]");
+                  if (!detailsButton) {
+                    return;
+                  }
+                  const binValue = parseInt(detailsButton.getAttribute("data-bin") || "", 10);
+                  if (!Number.isFinite(binValue)) {
+                    return;
+                  }
+                  fetchSamples(binValue);
+                });
+              }
               attached = true;
               return true;
             } catch (err) {
@@ -2693,7 +2717,7 @@ def create_app(project_root: Path | None = None) -> Flask:
             return jsonify({"error": "Results JSON has invalid format."}), 500
 
         bin_param = request.args.get("bin")
-        outcome = (request.args.get("outcome") or "").strip().lower()
+        outcome = (request.args.get("outcome") or "all").strip().lower()
 
         if bin_param is None:
             return jsonify({"error": "Missing required query param: bin."}), 400
@@ -2704,8 +2728,8 @@ def create_app(project_root: Path | None = None) -> Flask:
         if bin_value <= 0:
             return jsonify({"error": "Invalid bin value. Must be > 0."}), 400
 
-        if outcome not in {"failed", "correct"}:
-            return jsonify({"error": "Invalid outcome. Use 'failed' or 'correct'."}), 400
+        if outcome not in {"failed", "correct", "all"}:
+            return jsonify({"error": "Invalid outcome. Use 'failed', 'correct', or 'all'."}), 400
 
         dataset_prefix = f"datasets/{job['dataset']}/"
 
@@ -2719,6 +2743,8 @@ def create_app(project_root: Path | None = None) -> Flask:
             return None
 
         def _accuracy_match(rec: dict) -> bool:
+            if outcome == "all":
+                return True
             try:
                 acc = float(rec.get("accuracy"))
             except (TypeError, ValueError):
@@ -3377,12 +3403,15 @@ function normalizeImagePath(path) {
         }
 
         async function fetchSamples(binValue, outcome) {
-          title.textContent = `Samples: bin ${binValue} / ${outcome}`;
+          const normalizedOutcome = (outcome || "all").toLowerCase();
+          title.textContent = normalizedOutcome === "all"
+            ? `Samples for module size=${binValue} px`
+            : `Samples: bin ${binValue} / ${normalizedOutcome}`;
           status.textContent = "Loading...";
           list.innerHTML = "";
           openModal();
           try {
-            const resp = await fetch(`/api/jobs/${jobId}/samples?bin=${encodeURIComponent(binValue)}&outcome=${encodeURIComponent(outcome)}`);
+            const resp = await fetch(`/api/jobs/${jobId}/samples?bin=${encodeURIComponent(binValue)}&outcome=${encodeURIComponent(normalizedOutcome)}`);
             const raw = await resp.text();
             let data = null;
             try {
@@ -3402,6 +3431,29 @@ function normalizeImagePath(path) {
           } catch (err) {
             status.textContent = "Request failed.";
           }
+        }
+
+        function attachTableHandler() {
+          const targetTable = document.getElementById("baselineTargetSummary");
+          if (!targetTable || targetTable.dataset.drilldownBound) {
+            return;
+          }
+          targetTable.dataset.drilldownBound = "1";
+          targetTable.addEventListener("click", (event) => {
+            const target = event.target;
+            if (!(target instanceof HTMLElement)) {
+              return;
+            }
+            const detailsButton = target.closest("button.baseline-details-btn[data-bin]");
+            if (!detailsButton) {
+              return;
+            }
+            const binValue = parseInt(detailsButton.getAttribute("data-bin") || "", 10);
+            if (!Number.isFinite(binValue)) {
+              return;
+            }
+            fetchSamples(binValue);
+          });
         }
 
         function attachPlotlyHandler() {
@@ -3424,7 +3476,8 @@ function normalizeImagePath(path) {
               fetchSamples(binValue, outcome);
               return;
             }
-            if (traceName.includes("time total min")) {
+            const isTimeTrace = traceName === "time" || traceName.includes("time total min");
+            if (isTimeTrace) {
               const imagePath = normalizeImagePath(point.customdata);
               if (!imagePath) {
                 return;
@@ -3436,6 +3489,7 @@ function normalizeImagePath(path) {
           });
         }
 
+        attachTableHandler();
         attachPlotlyHandler();
       })();
     </script>"""

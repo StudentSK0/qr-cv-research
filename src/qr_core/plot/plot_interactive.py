@@ -147,6 +147,19 @@ def _build_baseline_report_html(
         max-height: 520px;
         overflow: auto;
       }
+      .baseline-details-btn {
+        border: 1px solid #0f8a8f;
+        background: #0f8a8f;
+        color: #fff;
+        border-radius: 999px;
+        padding: 4px 10px;
+        font-size: 12px;
+        cursor: pointer;
+      }
+      .baseline-details-btn:hover {
+        background: #0d7478;
+        border-color: #0d7478;
+      }
       html.is-embed .baseline-summary-card {
         display: none !important;
       }
@@ -198,6 +211,7 @@ def _build_baseline_report_html(
                 <th>accuracy</th>
                 <th>correct decodes</th>
                 <th>failed decodes</th>
+                <th>details</th>
               </tr>
             </thead>
             <tbody>
@@ -407,12 +421,18 @@ def build_interactive_plot(
                     f"<td>{float(b.mean_accuracy * 100.0):.2f}%</td>",
                     f"<td>{int(b.count_acc1)}</td>",
                     f"<td>{int(b.count_acc0)}</td>",
+                    (
+                        "<td>"
+                        f"<button type=\"button\" class=\"baseline-details-btn\" "
+                        f"data-bin=\"{int(b.module_size)}\">Details</button>"
+                        "</td>"
+                    ),
                     "</tr>",
                 ]
             )
         )
     if not binned_table_rows:
-        binned_table_rows.append('<tr><td colspan="5">No data.</td></tr>')
+        binned_table_rows.append('<tr><td colspan="6">No data.</td></tr>')
 
     pareto_table_rows: list[str] = []
     for p in pareto_front_points:

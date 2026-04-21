@@ -177,8 +177,29 @@ def _build_plot_html(target_stats: Sequence[dict[str, Any]], title: str) -> str:
     )
     fig.update_yaxes(title_text="Time (ms)", row=1, col=1)
     fig.update_yaxes(title_text="Accuracy (%)", range=[-10, 110], row=2, col=1)
-    fig.update_xaxes(title_text="Module size (px)", showticklabels=True, row=1, col=1)
-    fig.update_xaxes(title_text="Module size (px)", row=2, col=1)
+
+    x_axis_cfg: dict[str, Any]
+    unique_x = sorted(set(float(v) for v in x))
+    all_integer_x = bool(unique_x) and all(abs(v - round(v)) < 1e-9 for v in unique_x)
+    if all_integer_x:
+        min_x = int(round(unique_x[0]))
+        max_x = int(round(unique_x[-1]))
+        x_axis_cfg = {
+            "type": "linear",
+            "tickmode": "linear",
+            "tick0": min_x,
+            "dtick": 1,
+            "range": [min_x - 0.5, max_x + 0.5],
+        }
+    else:
+        x_axis_cfg = {
+            "tickmode": "array",
+            "tickvals": unique_x,
+            "ticktext": [f"{v:g}" for v in unique_x],
+        }
+
+    fig.update_xaxes(title_text="Module size (px)", showticklabels=True, row=1, col=1, **x_axis_cfg)
+    fig.update_xaxes(title_text="Module size (px)", row=2, col=1, **x_axis_cfg)
 
     return fig.to_html(full_html=False, include_plotlyjs=True)
 
